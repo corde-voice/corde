@@ -683,12 +683,19 @@
       <p>Featherweight Rust &amp; Tauri architecture that respects your RAM, battery, and privacy.</p>
     </div>
     <div class="grid">
-      <div class="card hot" style="--i: 0">
+      <div class="card" style="--i: 0">
         <div class="fv">
           <div class="kc"><span>Ctrl</span><span>Shift</span><span>V</span></div>
         </div>
+        <div class="rebind-pill">
+          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="8" cy="8" r="2.5"></circle>
+            <path d="M13.5 8a5.5 5.5 0 0 0-.2-1.4l1.3-1-1.2-2.1-1.6.6a5.5 5.5 0 0 0-1.2-.7L10.3 2H8.7l-.3 1.4a5.5 5.5 0 0 0-1.2.7l-1.6-.6-1.2 2.1 1.3 1a5.5 5.5 0 0 0 0 2.8l-1.3 1 1.2 2.1 1.6-.6a5.5 5.5 0 0 0 1.2.7l.3 1.4h2.4l.3-1.4a5.5 5.5 0 0 0 1.2-.7l1.6.6 1.2-2.1-1.3-1c.1-.4.2-.9.2-1.4z"/>
+          </svg>
+          <span>Rebind to any hotkey</span>
+        </div>
         <h3>Wake Word or Global Hotkey</h3>
-        <p>Say “Hey Cordė” hands-free or hold/tap your custom shortcut on macOS &amp; Windows.</p>
+        <p>Say “Hey Cordė” hands-free or rebind to any hotkey combination in Settings.</p>
       </div>
       <div class="card" style="--i: 1">
         <div class="fv">
