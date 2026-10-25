@@ -69,7 +69,7 @@
   const SECTION_SEO: Record<string, { id: string; title: string; description: string }> = {
     "/": {
       id: "top",
-      title: "Cordė — Your Offline AI Buddy for the Terminal & Desktop",
+      title: "Cordė | Your Offline AI Buddy",
       description: "Meet Cordė, your 100% offline AI buddy for macOS and Windows. Hands-free custom wake phrase, sub-second local dictation, expressive 3D desktop companion with natural offline voices, and an optional on-device AI assistant."
     },
     "/buddy": {
