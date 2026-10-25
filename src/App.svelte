@@ -404,15 +404,52 @@
       <img src={cordeLogo} alt="Cordė logo" />Cordė
     </a>
     <div class="links" class:open={mobileMenuOpen}>
-      <a href="/buddy" onclick={(e) => navigateSection(e, '/buddy', 'buddy')}>AI Buddy</a>
-      <a href="/offline-ai" onclick={(e) => navigateSection(e, '/offline-ai', 'offline-ai')}>Offline AI</a>
-      <a href="/features" onclick={(e) => navigateSection(e, '/features', 'features')}>Features</a>
-      <a href="/how-it-works" onclick={(e) => navigateSection(e, '/how-it-works', 'how-it-works')}>How it works</a>
-      <a href="/pricing" onclick={(e) => navigateSection(e, '/pricing', 'pricing')}>Pricing</a>
-      <a href="/faq" onclick={(e) => navigateSection(e, '/faq', 'faq')}>FAQ</a>
+      <!-- Desktop top-level links (with Product dropdown containing Product & AI + Developers & Plans) -->
+      <div class="nav-dropdown-wrap">
+        <a class="nav-top-link" href="/features" onclick={(e) => navigateSection(e, '/features', 'features')}>
+          Product <span class="nav-caret" aria-hidden="true">▾</span>
+        </a>
+        <div class="nav-dropdown" role="menu" aria-label="Product & AI and Developers & Plans sections">
+          <div class="nav-dropdown-col">
+            <span class="nav-group-title">Product &amp; AI</span>
+            <a href="/buddy" onclick={(e) => navigateSection(e, '/buddy', 'buddy')}>3D AI Buddy &amp; Voices</a>
+            <a href="/offline-ai" onclick={(e) => navigateSection(e, '/offline-ai', 'offline-ai')}>Offline AI Assistant (Qwen3)</a>
+            <a href="/features" onclick={(e) => navigateSection(e, '/features', 'features')}>Core Features</a>
+            <a href="/how-it-works" onclick={(e) => navigateSection(e, '/how-it-works', 'how-it-works')}>How It Works</a>
+          </div>
+          <div class="nav-dropdown-col">
+            <span class="nav-group-title">Developers &amp; Plans</span>
+            <a href="/use-cases" onclick={(e) => navigateSection(e, '/use-cases', 'use-cases')}>CLI &amp; Agent Use Cases</a>
+            <a href="/download" onclick={(e) => navigateSection(e, '/download', 'download')}>Download (macOS &amp; Windows)</a>
+            <a href="/pricing" onclick={(e) => navigateSection(e, '/pricing', 'pricing')}>Pricing &amp; Free Trial</a>
+            <a href="/faq" onclick={(e) => navigateSection(e, '/faq', 'faq')}>FAQ &amp; Install Guides</a>
+          </div>
+        </div>
+      </div>
+      <a class="nav-top-link desktop-only-link" href="/use-cases" onclick={(e) => navigateSection(e, '/use-cases', 'use-cases')}>Use cases</a>
+      <a class="nav-top-link desktop-only-link" href="/pricing" onclick={(e) => navigateSection(e, '/pricing', 'pricing')}>Pricing</a>
+      <a class="nav-top-link desktop-only-link" href="/faq" onclick={(e) => navigateSection(e, '/faq', 'faq')}>FAQ</a>
+
+      <!-- Mobile menu section groups -->
+      <div class="mobile-menu-groups">
+        <div class="mobile-menu-group">
+          <span class="nav-group-title">Product &amp; AI</span>
+          <a href="/buddy" onclick={(e) => navigateSection(e, '/buddy', 'buddy')}>3D AI Buddy &amp; Voices</a>
+          <a href="/offline-ai" onclick={(e) => navigateSection(e, '/offline-ai', 'offline-ai')}>Offline AI Assistant (Qwen3)</a>
+          <a href="/features" onclick={(e) => navigateSection(e, '/features', 'features')}>Core Features</a>
+          <a href="/how-it-works" onclick={(e) => navigateSection(e, '/how-it-works', 'how-it-works')}>How It Works</a>
+        </div>
+        <div class="mobile-menu-group">
+          <span class="nav-group-title">Developers &amp; Plans</span>
+          <a href="/use-cases" onclick={(e) => navigateSection(e, '/use-cases', 'use-cases')}>CLI &amp; Agent Use Cases</a>
+          <a href="/download" onclick={(e) => navigateSection(e, '/download', 'download')}>Download (macOS &amp; Windows)</a>
+          <a href="/pricing" onclick={(e) => navigateSection(e, '/pricing', 'pricing')}>Pricing &amp; Free Trial</a>
+          <a href="/faq" onclick={(e) => navigateSection(e, '/faq', 'faq')}>FAQ &amp; Install Guides</a>
+        </div>
+      </div>
     </div>
     <div class="nav-actions">
-      <a class="btn" href="/download" onclick={(e) => navigateSection(e, '/download', 'download')}>Download</a>
+      <a class="btn" href="/pricing" onclick={(e) => navigateSection(e, '/pricing', 'pricing')}>View pricing</a>
       <button
         class="menu-toggle"
         type="button"
@@ -957,42 +994,14 @@
   </section>
 
   <footer>
-    <div class="footer-top">
-      <div class="footer-brand-col">
-        <a class="brand" href="/" onclick={(e) => navigateSection(e, '/', 'top')}>
-          <img src={cordeLogo} alt="Cordė logo" />Cordė
-        </a>
-        <p>Your 100% offline AI buddy for voice dictation, custom wake phrases, natural Kitten TTS replies, and local Qwen3-1.7B assistance.</p>
-      </div>
-      <nav class="footer-sitemap" aria-label="Website Sections Directory">
-        <div>
-          <strong>Product &amp; AI</strong>
-          <a href="/buddy" onclick={(e) => navigateSection(e, '/buddy', 'buddy')}>3D AI Buddy &amp; Voices</a>
-          <a href="/offline-ai" onclick={(e) => navigateSection(e, '/offline-ai', 'offline-ai')}>Offline AI Assistant (Qwen3)</a>
-          <a href="/features" onclick={(e) => navigateSection(e, '/features', 'features')}>Core Features</a>
-          <a href="/how-it-works" onclick={(e) => navigateSection(e, '/how-it-works', 'how-it-works')}>How It Works</a>
-        </div>
-        <div>
-          <strong>Developers &amp; Plans</strong>
-          <a href="/use-cases" onclick={(e) => navigateSection(e, '/use-cases', 'use-cases')}>CLI &amp; Agent Use Cases</a>
-          <a href="/download" onclick={(e) => navigateSection(e, '/download', 'download')}>Download (macOS &amp; Windows)</a>
-          <a href="/pricing" onclick={(e) => navigateSection(e, '/pricing', 'pricing')}>Pricing &amp; Free Trial</a>
-          <a href="/faq" onclick={(e) => navigateSection(e, '/faq', 'faq')}>FAQ &amp; Install Guides</a>
-        </div>
-      </nav>
-    </div>
-    <div class="footer-bottom">
-      <div>© {new Date().getFullYear()} Cordė · CRIZZYALGO LTD · Your Offline AI Buddy</div>
-      <div class="footer-ext-links">
-        <a class="footer-release-link" href="/sitemap.xml">Sitemap</a>
-        <a class="footer-release-link" href="https://github.com/corde-voice/corde-releases/releases/latest" target="_blank" rel="noopener noreferrer">
-          GitHub Releases
-        </a>
-        <a class="footer-release-link" href="https://x.com/Corde_dex" target="_blank" rel="noopener noreferrer">
-          Follow @Corde_dex
-        </a>
-      </div>
-    </div>
+    <div>© Cordė · Your Offline AI Buddy</div>
+    <div>Code at the speed of thought.</div>
+    <a class="footer-release-link" href="https://github.com/corde-voice/corde-releases/releases/latest" target="_blank" rel="noopener noreferrer">
+      Download Cordė for macOS &amp; Windows
+    </a>
+    <a class="footer-release-link" href="https://x.com/Corde_dex" target="_blank" rel="noopener noreferrer">
+      Follow on X @Corde_dex
+    </a>
   </footer>
 
   {#if downloadGuideModal}
