@@ -1,9 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  export let mode: "idle" | "greeting" | "listening" | "thinking" | "sleeping" = "idle";
-  export let pulseTrigger = 0;
-
   let canvas: HTMLCanvasElement;
   let loaded = false;
   let loadError = false;
@@ -150,88 +147,23 @@
         loaded = true;
 
         let lastTime = performance.now();
-        let lastPulseSeen = pulseTrigger;
-        let pulseBoost = 0;
+        let autoYaw = 0;
 
         const animate = (now: number) => {
           if (disposed || !renderer) return;
           const dt = Math.min(0.1, (now - lastTime) / 1000);
           lastTime = now;
-          const t = now * 0.001;
 
-          if (pulseTrigger !== lastPulseSeen) {
-            lastPulseSeen = pulseTrigger;
-            pulseBoost = 1.0;
-          }
-          pulseBoost = Math.max(0, pulseBoost - dt * 1.8);
-
-          // Gently decay manual drag rotation back toward front when not dragging
+          // Smooth slow turntable rotation (no bouncing)
           if (!isDragging) {
-            userYawOffset *= Math.pow(0.92, dt * 60);
+            autoYaw += dt * 0.4;
           }
 
-          let targetY = 0;
-          let targetRotX = 0;
-          let targetRotY = userYawOffset;
-          let targetRotZ = 0;
-          let scaleX = 1;
-          let scaleY = 1;
-          let scaleZ = 1;
-
-          if (mode === "sleeping") {
-            targetY = Math.sin(t * 1.3) * 0.02 - 0.03;
-            targetRotX = 0.16 + Math.sin(t * 1.3) * 0.025;
-            targetRotY += Math.sin(t * 0.65) * 0.07;
-            targetRotZ = -0.055;
-          } else if (mode === "greeting") {
-            targetY = Math.abs(Math.sin(t * 8.5)) * 0.055 + Math.sin(t * 2.5) * 0.02;
-            targetRotX = Math.sin(t * 10.0) * 0.075 - 0.04;
-            targetRotY += Math.sin(t * 3.6) * 0.25;
-            targetRotZ = Math.cos(t * 5.4) * 0.085;
-            const talkSquash = Math.sin(t * 14.0) * 0.042;
-            scaleY = 1 + talkSquash;
-            scaleX = 1 - talkSquash * 0.48;
-            scaleZ = 1 - talkSquash * 0.48;
-          } else if (mode === "listening") {
-            const fakeVoice = 0.45 + 0.45 * Math.abs(Math.sin(t * 6.8) * Math.cos(t * 3.7));
-            targetY = Math.sin(t * 4.2) * 0.03 + fakeVoice * 0.055;
-            targetRotX = -0.06 - fakeVoice * 0.08 + Math.sin(t * 5.5) * 0.025;
-            targetRotY += Math.sin(t * 2.4) * 0.18;
-            targetRotZ = Math.sin(t * 4.2) * (0.04 + fakeVoice * 0.06);
-            const voiceSquash = fakeVoice * 0.065;
-            scaleY = 1 + voiceSquash;
-            scaleX = 1 - voiceSquash * 0.42;
-            scaleZ = 1 - voiceSquash * 0.42;
-          } else if (mode === "thinking") {
-            targetY = Math.sin(t * 3.4) * 0.035;
-            targetRotX = -0.05 + Math.sin(t * 4.8) * 0.065;
-            targetRotY += Math.sin(t * 1.9) * 0.26;
-            targetRotZ = Math.sin(t * 2.7) * 0.06;
-          } else {
-            // Lively floating idle
-            targetY = Math.sin(t * 2.1) * 0.036;
-            targetRotY += Math.sin(t * 1.1) * 0.22 + Math.sin(t * 0.45) * 0.08;
-            targetRotX = Math.sin(t * 1.6) * 0.045;
-            targetRotZ = Math.cos(t * 1.35) * 0.04;
-            const breathe = Math.sin(t * 2.1) * 0.018;
-            scaleY = 1 + breathe;
-            scaleX = 1 - breathe * 0.4;
-            scaleZ = 1 - breathe * 0.4;
-          }
-
-          if (pulseBoost > 0.01) {
-            targetY += Math.abs(Math.sin(pulseBoost * Math.PI * 2)) * 0.075 * pulseBoost;
-            targetRotZ += Math.sin(pulseBoost * Math.PI * 4) * 0.12 * pulseBoost;
-          }
-
-          const lerp = Math.min(1, dt * 10);
-          pivot.position.y += (targetY - pivot.position.y) * lerp;
-          pivot.rotation.x += (targetRotX - pivot.rotation.x) * lerp;
-          pivot.rotation.y += (targetRotY - pivot.rotation.y) * lerp;
-          pivot.rotation.z += (targetRotZ - pivot.rotation.z) * lerp;
-          pivot.scale.x += (scaleX - pivot.scale.x) * lerp;
-          pivot.scale.y += (scaleY - pivot.scale.y) * lerp;
-          pivot.scale.z += (scaleZ - pivot.scale.z) * lerp;
+          pivot.rotation.y = autoYaw + userYawOffset;
+          pivot.position.y = 0;
+          pivot.rotation.x = 0.02;
+          pivot.rotation.z = 0;
+          pivot.scale.set(1, 1, 1);
 
           renderer.render(scene, camera);
           animFrameId = requestAnimationFrame(animate);
@@ -279,13 +211,20 @@
     position: relative;
     width: 100%;
     height: 100%;
-    min-height: 280px;
+    min-height: 260px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: grab;
     user-select: none;
     touch-action: pan-y;
+  }
+
+  @media (max-width: 560px) {
+    .mascot-stage {
+      min-height: 170px;
+      height: 170px;
+    }
   }
 
   .mascot-stage.dragging {

@@ -21,9 +21,9 @@
   let currentAudio: HTMLAudioElement | null = null;
 
   const VOICE_META: Record<"jasper" | "bella" | "luna", { label: string; tag: string }> = {
-    jasper: { label: "Jasper", tag: "Warm & Natural · 48kHz" },
-    bella: { label: "Bella", tag: "Clear & Expressive · 48kHz" },
-    luna: { label: "Luna", tag: "Bright & Friendly · 48kHz" }
+    jasper: { label: "Jasper", tag: "Warm & Natural" },
+    bella: { label: "Bella", tag: "Clear & Expressive" },
+    luna: { label: "Luna", tag: "Bright & Friendly" }
   };
 
   $: mascotBubbleText =
@@ -36,11 +36,6 @@
           : mascotMode === "sleeping"
             ? `Zzz… Paused on Battery Saver (< 50 MB RAM)`
             : `Say "Hey ${customBuddyName}" anytime!`;
-
-  function setMascotState(nextMode: "idle" | "greeting" | "listening" | "thinking" | "sleeping") {
-    mascotMode = nextMode;
-    mascotPulse += 1;
-  }
 
   function playVoiceSample(voice: "jasper" | "bella" | "luna", nameOverride?: "Cordė" | "Mark") {
     const targetName = nameOverride ?? customBuddyName;
@@ -80,7 +75,7 @@
     "/buddy": {
       id: "buddy",
       title: "Meet Your 3D Desktop AI Buddy | Cordė",
-      description: "Interact with Cordė's featherweight 3D desktop companion. Custom wake phrase ('Hey Cordė' or rename to any name) and 3 bundled 48kHz natural offline voices (Jasper, Bella, Luna)."
+      description: "Interact with Cordė's featherweight 3D desktop companion. Custom wake phrase ('Hey Cordė' or rename to any name) and bundled natural offline voices."
     },
     "/offline-ai": {
       id: "offline-ai",
@@ -537,10 +532,10 @@
   <!-- INTERACTIVE 3D MASCOT & WAKE WORD SHOWCASE -->
   <section id="buddy" class="buddy-section" aria-labelledby="buddy-heading">
     <div class="hd">
-      <span class="sec-pill">INTERACTIVE 3D COMPANION · NATURAL OFFLINE VOICES</span>
-      <h2 id="buddy-heading">A Living Desktop Buddy That Speaks Your Language</h2>
+      <span class="sec-pill">INTERACTIVE 3D COMPANION</span>
+      <h2 id="buddy-heading">Your Desktop AI Buddy</h2>
       <p>
-        Cordė floats lightly in the corner of your screen, wakes up when you call its name, and replies with studio-grade 48kHz offline voices.
+        Cordė sits in your tray, wakes when you speak, and replies offline.
       </p>
     </div>
 
@@ -551,13 +546,7 @@
             <i></i>
             {mascotMode === "greeting"
               ? `Wake Triggered · “Hey ${customBuddyName}”`
-              : mascotMode === "listening"
-                ? "Voice Activity Detected · Recording"
-                : mascotMode === "thinking"
-                  ? "Cordė AI · Answering Offline"
-                  : mascotMode === "sleeping"
-                    ? "Battery Saver · Sleeping"
-                    : "Standby · < 50 MB RAM"}
+              : "Standby · < 50 MB RAM"}
           </span>
           <span class="buddy-drag-hint">Drag 3D model to rotate</span>
         </div>
@@ -567,24 +556,16 @@
         </div>
 
         <div class="buddy-canvas-wrap">
-          <MascotShowcase mode={mascotMode} pulseTrigger={mascotPulse} />
-        </div>
-
-        <div class="buddy-state-bar" role="group" aria-label="Preview 3D mascot states">
-          <button type="button" class:active={mascotMode === "greeting"} onclick={() => setMascotState("greeting")}>👋 “Hey {customBuddyName}”</button>
-          <button type="button" class:active={mascotMode === "listening"} onclick={() => setMascotState("listening")}>🎙️ Listening</button>
-          <button type="button" class:active={mascotMode === "thinking"} onclick={() => setMascotState("thinking")}>🧠 AI Answer</button>
-          <button type="button" class:active={mascotMode === "idle"} onclick={() => setMascotState("idle")}>✨ Idle</button>
-          <button type="button" class:active={mascotMode === "sleeping"} onclick={() => setMascotState("sleeping")}>💤 Sleep</button>
+          <MascotShowcase />
         </div>
       </div>
 
       <div class="buddy-controls-col">
         <div class="buddy-feature-box">
-          <small class="buddy-eyebrow">1 · RENAME YOUR BUDDY &amp; WAKE PHRASE</small>
+          <small class="buddy-eyebrow">CUSTOM NAME &amp; WAKE PHRASE</small>
           <h3>Call it “Hey Cordė” — or name it anything</h3>
           <p>
-            Give your companion a custom name in Settings. A 3-step local acoustic calibration learns how you say <em>“Hey Mark”</em>, <em>“Hey Luna”</em>, or <em>“Hey Cordė”</em> without ever saving voiceprints to the cloud.
+            Rename your companion in Settings. A quick 3-step calibration learns your voice offline without sending audio anywhere.
           </p>
           <div class="buddy-name-pills">
             <button
@@ -603,32 +584,6 @@
             >
               Custom name: <b>“Hey Mark”</b>
             </button>
-          </div>
-        </div>
-
-        <div class="buddy-feature-box">
-          <small class="buddy-eyebrow">2 · HEAR THE 3 BUNDLED OFFLINE VOICES</small>
-          <h3>Natural spoken replies — zero network lag</h3>
-          <p>
-            Choose from three expressive offline voices. Cordė greets you on wake (<em>“Hi! I'm listening”</em>), confirms when your prompt lands (<em>“I've sent that!”</em>), and speaks AI answers aloud.
-          </p>
-          <div class="voice-grid">
-            {#each (["jasper", "bella", "luna"] as const) as vKey}
-              <button
-                type="button"
-                class="voice-btn"
-                class:active={selectedVoice === vKey}
-                onclick={() => playVoiceSample(vKey)}
-              >
-                <span class="voice-play-icon" aria-hidden="true">
-                  {selectedVoice === vKey && isPlayingVoice ? "🔊" : "▶"}
-                </span>
-                <span class="voice-info">
-                  <b>{VOICE_META[vKey].label}</b>
-                  <small>{VOICE_META[vKey].tag}</small>
-                </span>
-              </button>
-            {/each}
           </div>
         </div>
       </div>
@@ -764,7 +719,7 @@
           </svg>
         </div>
         <h3>Types Anywhere + Speaks Back</h3>
-        <p>Injects words right at your cursor and confirms aloud with natural 48kHz voices.</p>
+        <p>Injects words right at your cursor and confirms aloud with natural offline voices.</p>
       </div>
       <div class="card" style="--i: 1">
         <div class="fv">
