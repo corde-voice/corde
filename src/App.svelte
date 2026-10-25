@@ -75,6 +75,29 @@
   let mobileMenuOpen = false;
   let navHidden = false;
   let billingSuccess = false;
+  let downloadGuideModal: "mac" | "win" | null = null;
+  let copiedXattrCommand = false;
+
+  function openDownloadGuide(os: "mac" | "win") {
+    downloadGuideModal = os;
+    copiedXattrCommand = false;
+  }
+
+  function closeDownloadGuide() {
+    downloadGuideModal = null;
+  }
+
+  async function copyMacTerminalCommand() {
+    try {
+      await navigator.clipboard.writeText("xattr -cr /Applications/Cordė.app");
+      copiedXattrCommand = true;
+      setTimeout(() => {
+        copiedXattrCommand = false;
+      }, 2200);
+    } catch {
+      // ignore clipboard errors
+    }
+  }
   let emailConfirmation: {
     state: "success" | "error";
     appUrl: string | null;
@@ -278,11 +301,23 @@
   </header>
 
   <div class="dl" id="download">
-    <span class="dlb" aria-disabled="true" data-os="mac">
+    <a
+      class="dlb"
+      href="https://github.com/corde-voice/corde-releases/releases/latest/download/Corde-macos-aarch64.dmg"
+      class:rec={recommendedOS === 'mac'}
+      data-os="mac"
+      onclick={() => openDownloadGuide('mac')}
+    >
       <svg class="fi" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
-      <span><b>macOS</b><small>Coming soon · Intel &amp; Apple Silicon</small></span>
-    </span>
-    <a class="dlb" href="https://github.com/corde-voice/corde-releases/releases/latest/download/Corde-setup.exe" class:rec={recommendedOS === 'win'} data-os="win">
+      <span><b>macOS</b><small>Download · Apple Silicon &amp; Intel</small></span>
+    </a>
+    <a
+      class="dlb"
+      href="https://github.com/corde-voice/corde-releases/releases/latest/download/Corde-setup.exe"
+      class:rec={recommendedOS === 'win'}
+      data-os="win"
+      onclick={() => openDownloadGuide('win')}
+    >
       <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
       <span><b>Windows</b><small>Download · Windows 10 &amp; 11</small></span>
     </a>
@@ -538,12 +573,57 @@
     <div>© Cordė · Voice to terminal</div>
     <div>Code at the speed of thought.</div>
     <a class="footer-release-link" href="https://github.com/corde-voice/corde-releases/releases/latest" target="_blank" rel="noopener noreferrer">
-      Download Cordė for Windows
+      Download Cordė for macOS &amp; Windows
     </a>
     <a class="footer-release-link" href="https://x.com/Corde_dex" target="_blank" rel="noopener noreferrer">
       Follow on X @Corde_dex
     </a>
   </footer>
+
+  {#if downloadGuideModal}
+    <div
+      class="dl-modal-backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="dl-modal-title"
+      tabindex="-1"
+      onclick={(e) => { if (e.target === e.currentTarget) closeDownloadGuide(); }}
+      onkeydown={(e) => { if (e.key === 'Escape') closeDownloadGuide(); }}
+    >
+      <div class="dl-modal-card">
+        <button class="dl-modal-close" type="button" aria-label="Close instructions" onclick={closeDownloadGuide}>✕</button>
+        {#if downloadGuideModal === 'mac'}
+          <p class="dl-modal-eyebrow">DOWNLOADING CORDĖ FOR MACOS</p>
+          <h3 id="dl-modal-title">First-time launch on macOS:</h3>
+          <ol class="dl-modal-steps">
+            <li>Open the <code>.dmg</code> and drag <strong>Cordė</strong> into <strong>Applications</strong>.</li>
+            <li><strong>Right-click</strong> <strong>Cordė</strong> in Applications and select <strong>Open</strong> <em>(or on macOS Sequoia, go to <strong>System Settings → Privacy &amp; Security</strong> and click <strong>Open Anyway</strong>)</em>.</li>
+            <li>
+              If macOS says the app cannot be opened, run <code>xattr -cr /Applications/Cordė.app</code> in Terminal. You only need to do this once!
+              <div class="dl-modal-cmd-row">
+                <code>xattr -cr /Applications/Cordė.app</code>
+                <button type="button" class="dl-modal-copy-btn" onclick={copyMacTerminalCommand}>
+                  {copiedXattrCommand ? "Copied!" : "Copy"}
+                </button>
+              </div>
+            </li>
+          </ol>
+          <p class="dl-modal-alt">
+            Using an Intel Mac? <a href="https://github.com/corde-voice/corde-releases/releases/latest/download/Corde-macos-x64.dmg">Download Intel (.dmg)</a>
+          </p>
+        {:else}
+          <p class="dl-modal-eyebrow">DOWNLOADING CORDĖ FOR WINDOWS</p>
+          <h3 id="dl-modal-title">First-time launch on Windows:</h3>
+          <ol class="dl-modal-steps">
+            <li>Open the downloaded <code>Corde-setup.exe</code> installer.</li>
+            <li>If Windows Defender SmartScreen shows <em>“Windows protected your PC”</em>, click <strong>More info</strong>.</li>
+            <li>Click <strong>Run anyway</strong> to complete the installation. You only need to do this once!</li>
+          </ol>
+        {/if}
+        <button type="button" class="btn dl-modal-done" onclick={closeDownloadGuide}>Got it</button>
+      </div>
+    </div>
+  {/if}
   {/if}
 </div>
 
@@ -617,5 +697,133 @@
   .keys {
     display: flex;
     gap: 6px;
+  }
+
+  .dl-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: rgba(5, 6, 15, 0.78);
+    backdrop-filter: blur(8px);
+  }
+
+  .dl-modal-card {
+    position: relative;
+    width: min(100%, 490px);
+    padding: clamp(24px, 4vw, 34px);
+    border: 1px solid rgba(143, 131, 255, 0.28);
+    border-radius: 20px;
+    background: rgba(14, 15, 36, 0.96);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+    text-align: left;
+  }
+
+  .dl-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .dl-modal-close:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+  }
+
+  .dl-modal-eyebrow {
+    margin: 0 0 6px;
+    color: #b9b0ff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+  }
+
+  .dl-modal-card h3 {
+    margin: 0 0 16px;
+    font-size: 22px;
+    color: #fff;
+  }
+
+  .dl-modal-steps {
+    margin: 0 0 18px;
+    padding-left: 20px;
+    color: rgba(255, 255, 255, 0.84);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .dl-modal-steps li {
+    margin-bottom: 10px;
+  }
+
+  .dl-modal-steps code {
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: rgba(143, 131, 255, 0.16);
+    color: #d9d4ff;
+    font-size: 12.5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+
+  .dl-modal-cmd-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 8px;
+    padding: 8px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    background: rgba(6, 7, 18, 0.85);
+  }
+
+  .dl-modal-cmd-row code {
+    background: transparent;
+    padding: 0;
+    color: #e6e2ff;
+  }
+
+  .dl-modal-copy-btn {
+    padding: 5px 11px;
+    border: 1px solid rgba(143, 131, 255, 0.35);
+    border-radius: 7px;
+    background: rgba(143, 131, 255, 0.18);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .dl-modal-copy-btn:hover {
+    background: rgba(143, 131, 255, 0.32);
+  }
+
+  .dl-modal-alt {
+    margin: 0 0 18px;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 13px;
+  }
+
+  .dl-modal-alt a {
+    color: #b9b0ff;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .dl-modal-done {
+    width: 100%;
+    justify-content: center;
+    cursor: pointer;
   }
 </style>
