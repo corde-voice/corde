@@ -645,48 +645,6 @@
       </p>
     </div>
 
-    <div class="ai-hero-banner">
-      <div class="ai-banner-copy">
-        <span class="ai-tag">OFF BY DEFAULT · DOWNLOADED ONLY ON DEMAND</span>
-        <h3>Small installer today. Full local brain when you want it.</h3>
-        <p>
-          The ~1.1 GB quantized <code>Qwen3-1.7B</code> GGUF model is <strong>never bundled</strong> with the Cordė installer. When you switch the AI toggle on, Cordė checks your free disk space, shows the exact storage path, verifies the SHA-256 checksum, and runs 100% offline forever after.
-        </p>
-        <ul class="ai-guarantees">
-          <li><span>✓</span> <strong>One-time verified download:</strong> Resumable download with Pause/Cancel. Delete anytime with one click to free 1.1 GB.</li>
-          <li><span>✓</span> <strong>Zero dictation slowdown:</strong> Queued on dedicated background threads via <code>llama.cpp</code> so Whisper dictation stays instant.</li>
-          <li><span>✓</span> <strong>Auto-unload memory saver:</strong> Automatically unloads after 10 minutes of inactivity to keep laptop RAM free.</li>
-        </ul>
-      </div>
-
-      <div class="ai-settings-mock" aria-label="Preview of Settings AI Section">
-        <div class="ai-mock-header">
-          <span>Settings → AI Assistant</span>
-          <span class="ai-mock-status">Ready · Offline</span>
-        </div>
-        <div class="ai-mock-row">
-          <div>
-            <b>Offline AI assistant</b>
-            <small>Ask questions &amp; give voice commands without internet</small>
-          </div>
-          <span class="ai-toggle-pill" aria-hidden="true"><i></i></span>
-        </div>
-        <div class="ai-mock-meta">
-          <div><span>Model</span><b>Qwen3-1.7B (Q4_K_M GGUF)</b></div>
-          <div><span>Size on disk</span><b>1.12 GB · SHA-256 Verified</b></div>
-          <div><span>License</span><b>Apache 2.0 · 100% Local</b></div>
-        </div>
-        <div class="ai-mock-checks">
-          <span>✓ Ask before running commands (On)</span>
-          <span>○ Thinking mode (deeper reasoning)</span>
-        </div>
-        <div class="ai-mock-actions">
-          <span class="ai-mock-btn">Open folder</span>
-          <span class="ai-mock-btn danger">Delete model (frees 1.1 GB)</span>
-        </div>
-      </div>
-    </div>
-
     <div class="grid ai-capabilities-grid">
       <div class="card">
         <div class="ai-cap-badge">SAFETY FIRST</div>
