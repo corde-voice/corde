@@ -28,7 +28,7 @@
 
   $: mascotBubbleText =
     mascotMode === "greeting"
-      ? `Hi! I'm ${customBuddyName}. This is how I'll sound when I reply to you.`
+      ? `Hi! I'm ${customBuddyName}.`
       : mascotMode === "listening"
         ? `Listening to your terminal prompt…`
         : mascotMode === "thinking"
