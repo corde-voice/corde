@@ -922,6 +922,9 @@
     <a class="footer-release-link" href="https://x.com/Corde_dex" target="_blank" rel="noopener noreferrer">
       Follow on X @Corde_dex
     </a>
+    <a class="footer-release-link" href="https://instagram.com/cordedex" target="_blank" rel="noopener noreferrer">
+      Follow on Instagram @cordedex
+    </a>
   </footer>
 
   {#if downloadGuideModal}
