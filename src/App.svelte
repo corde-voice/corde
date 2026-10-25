@@ -1,15 +1,146 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import cordeLogo from './assets/corde icon.png';
+  import MascotShowcase from './lib/MascotShowcase.svelte';
 
   const TXT = "refactor the auth middleware to use JWT refresh tokens, add per-user rate limiting and write tests";
-  
-  let txContent = "Press Ctrl+Shift+V and start speaking";
+
+  let txContent = 'Say "Hey Cordė" or press Ctrl+Shift+V';
   let activeKeys = [false, false, false]; // Ctrl, Shift, V
-  let micActive = false;
+  let wakeBadgeActive = false;
   let micBarHeights = [6, 6, 6, 6, 6];
   let eqBars = Array(22).fill(0).map((_, i) => 14 + Math.abs(Math.sin(i * 0.8)) * 40);
   let micInterval: number;
+
+  // Interactive 3D Mascot & Voice Preview state
+  let mascotMode: "idle" | "greeting" | "listening" | "thinking" | "sleeping" = "greeting";
+  let mascotPulse = 0;
+  let customBuddyName: "Cordė" | "Mark" = "Cordė";
+  let selectedVoice: "jasper" | "bella" | "luna" = "jasper";
+  let isPlayingVoice = false;
+  let currentAudio: HTMLAudioElement | null = null;
+
+  const VOICE_META: Record<"jasper" | "bella" | "luna", { label: string; tag: string }> = {
+    jasper: { label: "Jasper", tag: "Warm & Natural · 48kHz" },
+    bella: { label: "Bella", tag: "Clear & Expressive · 48kHz" },
+    luna: { label: "Luna", tag: "Bright & Friendly · 48kHz" }
+  };
+
+  $: mascotBubbleText =
+    mascotMode === "greeting"
+      ? `Hi! I'm ${customBuddyName}. This is how I'll sound when I reply to you.`
+      : mascotMode === "listening"
+        ? `Listening to your terminal prompt…`
+        : mascotMode === "thinking"
+          ? `Qwen3-1.7B (Offline): "Use git rebase -i HEAD~3 to squash those commits safely."`
+          : mascotMode === "sleeping"
+            ? `Zzz… Paused on Battery Saver (< 50 MB RAM)`
+            : `Say "Hey ${customBuddyName}" anytime!`;
+
+  function setMascotState(nextMode: "idle" | "greeting" | "listening" | "thinking" | "sleeping") {
+    mascotMode = nextMode;
+    mascotPulse += 1;
+  }
+
+  function playVoiceSample(voice: "jasper" | "bella" | "luna", nameOverride?: "Cordė" | "Mark") {
+    const targetName = nameOverride ?? customBuddyName;
+    selectedVoice = voice;
+    customBuddyName = targetName;
+    mascotMode = "greeting";
+    mascotPulse += 1;
+
+    try {
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+      }
+      const suffix = targetName === "Mark" ? "_mark" : "";
+      const audio = new Audio(`/voices/${voice}${suffix}.wav`);
+      currentAudio = audio;
+      isPlayingVoice = true;
+      audio.onended = () => {
+        isPlayingVoice = false;
+      };
+      audio.onerror = () => {
+        isPlayingVoice = false;
+      };
+      void audio.play();
+    } catch {
+      isPlayingVoice = false;
+    }
+  }
+
+  // Section SEO metadata for clean URL indexing
+  const SECTION_SEO: Record<string, { id: string; title: string; description: string }> = {
+    "/": {
+      id: "top",
+      title: "Cordė — Your Offline AI Buddy for the Terminal & Desktop",
+      description: "Meet Cordė, your 100% offline AI buddy for macOS and Windows. Hands-free custom wake phrase, sub-second local Whisper dictation, expressive 3D desktop companion with natural Kitten TTS voices, and an optional on-device Qwen3-1.7B AI assistant."
+    },
+    "/buddy": {
+      id: "buddy",
+      title: "Meet Your 3D Desktop AI Buddy | Cordė",
+      description: "Interact with Cordė's featherweight 3D desktop companion. Custom wake phrase ('Hey Cordė' or rename to any name) and 3 bundled 48kHz natural offline voices (Jasper, Bella, Luna)."
+    },
+    "/offline-ai": {
+      id: "offline-ai",
+      title: "Optional Offline AI Assistant (Qwen3-1.7B) | Cordė",
+      description: "Ask questions, clean up dictation, explain terminal errors, and run confirmed voice commands 100% offline with Qwen3-1.7B. Opt-in 1.1 GB download with zero installer bloat."
+    },
+    "/features": {
+      id: "features",
+      title: "Features — Local Whisper, Wake Phrase & Offline Voices | Cordė",
+      description: "Global hotkey, hands-free wake word, on-device Whisper speech recognition, Kitten TTS voices, sub-second speed, and under 50 MB idle RAM."
+    },
+    "/how-it-works": {
+      id: "how-it-works",
+      title: "How Cordė Works — Wake, Speak, Type or Ask Offline | Cordė",
+      description: "Three simple steps: trigger by custom wake phrase or shortcut, speak naturally, and let Cordė type into your terminal or answer offline."
+    },
+    "/use-cases": {
+      id: "use-cases",
+      title: "Use Cases — Built for CLI Coding Agents & Developers | Cordė",
+      description: "Dictate prompts and talk to Claude Code, Cursor, Gemini CLI, OpenCode, Warp, iTerm2, Ghostty, and Neovim completely offline."
+    },
+    "/download": {
+      id: "download",
+      title: "Download Cordė for macOS (Apple Silicon & Intel) & Windows | Cordė",
+      description: "Download the Cordė desktop app for macOS (.dmg for M1/M2/M3/M4 and Intel) and Windows 10 & 11 (.exe). Start your 7-day free trial."
+    },
+    "/pricing": {
+      id: "pricing",
+      title: "Pricing — 7-Day Free Trial, $2.99/mo | Cordė",
+      description: "Try Cordė free for 7 days with no credit card required. Simple plans at $2.99/month or $34.99/year with unlimited offline dictation and AI buddy features."
+    },
+    "/faq": {
+      id: "faq",
+      title: "FAQ & macOS / Windows First-Time Launch Guides | Cordė",
+      description: "Answers on offline privacy, Qwen3-1.7B local AI model storage, custom wake words, macOS Gatekeeper launch steps, and Windows SmartScreen installation."
+    }
+  };
+
+  function applySectionSeo(pathname: string) {
+    const cleanPath = pathname.replace(/\/+$/, "") || "/";
+    const meta = SECTION_SEO[cleanPath] ?? SECTION_SEO["/"];
+    document.title = meta.title;
+    const descEl = document.querySelector('meta[name="description"]');
+    if (descEl) descEl.setAttribute("content", meta.description);
+    const canonEl = document.querySelector('link[rel="canonical"]');
+    if (canonEl) {
+      canonEl.setAttribute("href", cleanPath === "/" ? "https://corde.site/" : `https://corde.site${cleanPath}`);
+    }
+  }
+
+  function navigateSection(e: MouseEvent, path: string, sectionId: string) {
+    e.preventDefault();
+    mobileMenuOpen = false;
+    const target = document.getElementById(sectionId);
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth" });
+    }
+    history.pushState({}, "", path);
+    applySectionSeo(path);
+  }
 
   const IC: Record<string, string> = {
     "Claude Code": "m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z",
@@ -52,22 +183,25 @@
       return;
     }
     while (true) {
-      txContent = "Press Ctrl+Shift+V and start speaking";
+      txContent = 'Say "Hey Cordė" or press Ctrl+Shift+V';
+      wakeBadgeActive = false;
       await sleep(1400);
+      wakeBadgeActive = true;
       for (let i = 0; i < activeKeys.length; i++) {
         activeKeys[i] = true;
-        await sleep(130);
+        await sleep(120);
       }
-      txContent = "";
+      txContent = "🎙️ Cordė: “Hi! I'm listening…”";
       wv(true);
-      await sleep(1500);
+      await sleep(1300);
       activeKeys = [false, false, false];
-      wv(false);
       for (let i = 1; i <= TXT.length; i++) {
         txContent = TXT.slice(0, i);
         await sleep(14);
       }
-      await sleep(3200);
+      wv(false);
+      wakeBadgeActive = false;
+      await sleep(3000);
     }
   }
 
@@ -98,6 +232,7 @@
       // ignore clipboard errors
     }
   }
+
   let emailConfirmation: {
     state: "success" | "error";
     appUrl: string | null;
@@ -107,10 +242,10 @@
   onMount(() => {
     const previousScrollRestoration = history.scrollRestoration;
     history.scrollRestoration = "manual";
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
 
-    if (window.location.pathname.replace(/\/+$/, "") === "/auth/confirmed") {
+    const currentPath = window.location.pathname.replace(/\/+$/, "") || "/";
+
+    if (currentPath === "/auth/confirmed") {
       const confirmationUrl = new URL(window.location.href);
       const code = confirmationUrl.searchParams.get("code");
       const failed = ["error", "error_code", "error_description"].some((key) =>
@@ -144,6 +279,28 @@
       };
     }
 
+    // Apply route-based section SEO and scroll if visiting a section URL directly
+    applySectionSeo(currentPath);
+    if (currentPath !== "/" && SECTION_SEO[currentPath]) {
+      setTimeout(() => {
+        const target = document.getElementById(SECTION_SEO[currentPath].id);
+        target?.scrollIntoView({ behavior: "smooth" });
+      }, 120);
+    } else {
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }
+
+    const handlePopState = () => {
+      const path = window.location.pathname.replace(/\/+$/, "") || "/";
+      applySectionSeo(path);
+      const sec = SECTION_SEO[path];
+      if (sec) {
+        document.getElementById(sec.id)?.scrollIntoView({ behavior: "smooth" });
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+
     loop();
     const u = navigator.userAgent;
     recommendedOS = /Android|iPhone|iPad/.test(u) ? "" : /Mac/.test(u) ? "mac" : /Win/.test(u) ? "win" : /Linux|X11/.test(u) ? "linux" : "";
@@ -170,7 +327,7 @@
             featureObserver?.unobserve(entry.target);
           }
         });
-      }, { threshold: 0.25 });
+      }, { threshold: 0.2 });
       cards.forEach(card => featureObserver?.observe(card));
     } else {
       cards.forEach(card => card.classList.add("in"));
@@ -178,6 +335,7 @@
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("popstate", handlePopState);
       featureObserver?.disconnect();
       history.scrollRestoration = previousScrollRestoration;
     };
@@ -241,18 +399,20 @@
       </div>
     </main>
   {:else}
-  <nav class:hidden={navHidden}>
-    <a class="brand" href="#top" aria-label="Cordė home">
-      <img src={cordeLogo} alt="" aria-hidden="true" />Cordė
+  <nav class:hidden={navHidden} aria-label="Primary navigation">
+    <a class="brand" href="/" onclick={(e) => navigateSection(e, '/', 'top')} aria-label="Cordė home">
+      <img src={cordeLogo} alt="Cordė logo" />Cordė
     </a>
     <div class="links" class:open={mobileMenuOpen}>
-      <a href="#features" onclick={() => mobileMenuOpen = false}>Product</a>
-      <a href="#teams" onclick={() => mobileMenuOpen = false}>Use cases</a>
-      <a href="#pricing" onclick={() => mobileMenuOpen = false}>Pricing</a>
-      <a href="#faq" onclick={() => mobileMenuOpen = false}>FAQ</a>
+      <a href="/buddy" onclick={(e) => navigateSection(e, '/buddy', 'buddy')}>AI Buddy</a>
+      <a href="/offline-ai" onclick={(e) => navigateSection(e, '/offline-ai', 'offline-ai')}>Offline AI</a>
+      <a href="/features" onclick={(e) => navigateSection(e, '/features', 'features')}>Features</a>
+      <a href="/how-it-works" onclick={(e) => navigateSection(e, '/how-it-works', 'how-it-works')}>How it works</a>
+      <a href="/pricing" onclick={(e) => navigateSection(e, '/pricing', 'pricing')}>Pricing</a>
+      <a href="/faq" onclick={(e) => navigateSection(e, '/faq', 'faq')}>FAQ</a>
     </div>
     <div class="nav-actions">
-      <a class="btn" href="#pricing">View pricing</a>
+      <a class="btn" href="/download" onclick={(e) => navigateSection(e, '/download', 'download')}>Download</a>
       <button
         class="menu-toggle"
         type="button"
@@ -271,10 +431,17 @@
   <div class="nav-spacer" aria-hidden="true"></div>
 
   <header class="hero" id="top">
-    <h1>Smart Voice Input for Your Terminal</h1>
-    <p class="sub">Speak your prompts and Cordė types them into any terminal or window. Private, instant, and processed entirely on your machine.</p>
-    <div class="box" aria-label="Animated demo: speech typed into a terminal prompt">
+    <div class="hero-eyebrow">
+      <span class="hero-dot"></span>
+      100% ON-DEVICE · WAKE PHRASE · VOICE DICTATION · OFFLINE AI
+    </div>
+    <h1>Meet Cordė, Your Offline AI Buddy</h1>
+    <p class="sub">
+      Say <strong>“Hey Cordė”</strong> (or give your buddy any name) to dictate into any terminal, hear natural offline voice replies, and ask questions or run voice commands—processed 100% on your machine.
+    </p>
+    <div class="box" aria-label="Animated demo: wake phrase and speech typed into a terminal prompt">
       <div class="keys">
+        <span class="k wake-pill" class:dn={wakeBadgeActive}>“Hey Cordė”</span>
         <span class="k" class:dn={activeKeys[0]}>Ctrl</span>
         <span class="k" class:dn={activeKeys[1]}>Shift</span>
         <span class="k" class:dn={activeKeys[2]}>V</span>
@@ -285,50 +452,231 @@
           <i style="height: {height}px"></i>
         {/each}
       </div>
-      <span class="btn go">Send</span>
+      <span class="btn go">Sent ✓</span>
     </div>
     <div class="cta">
-      <a class="btn lg" href="#pricing">See pricing</a>
-      <a class="btn lg ghost" href="#how">See how it works</a>
+      <a class="btn lg" href="/buddy" onclick={(e) => navigateSection(e, '/buddy', 'buddy')}>Meet your 3D Buddy</a>
+      <a class="btn lg ghost" href="/offline-ai" onclick={(e) => navigateSection(e, '/offline-ai', 'offline-ai')}>Explore Offline AI</a>
     </div>
-    <a class="trial-card" href="#download">
+    <a class="trial-card" href="/download" onclick={(e) => navigateSection(e, '/download', 'download')}>
       <span class="trial-card-copy">
-        <b>Try Cordė free</b>
-        <small>7-day free trial · No credit card required</small>
+        <b>Try Cordė free for 7 days</b>
+        <small>macOS (Apple Silicon &amp; Intel) · Windows 10 &amp; 11 · No credit card required</small>
       </span>
       <span class="trial-card-arrow" aria-hidden="true">→</span>
     </a>
   </header>
 
-  <div class="dl" id="download">
-    <a
-      class="dlb"
-      href="#download"
-      class:rec={recommendedOS === 'mac'}
-      data-os="mac"
-      onclick={(e) => { e.preventDefault(); openDownloadGuide('mac'); }}
-    >
-      <svg class="fi" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
-      <span><b>macOS</b><small>Download · Apple Silicon &amp; Intel</small></span>
-    </a>
-    <a
-      class="dlb"
-      href="https://github.com/corde-voice/corde-releases/releases/latest/download/Corde-setup.exe"
-      class:rec={recommendedOS === 'win'}
-      data-os="win"
-      onclick={() => openDownloadGuide('win')}
-    >
-      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
-      <span><b>Windows</b><small>Download · Windows 10 &amp; 11</small></span>
-    </a>
-    <span class="dlb" aria-disabled="true" data-os="linux">
-      <svg class="fi" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a.424.424 0 00-.11.135c-.26.268-.45.6-.663.839-.199.199-.485.267-.797.4-.313.136-.658.269-.864.68-.09.189-.136.394-.132.602 0 .199.027.4.055.536.058.399.116.728.04.97-.249.68-.28 1.145-.106 1.484.174.334.535.47.94.601.81.2 1.91.135 2.774.6.926.466 1.866.67 2.616.47.526-.116.97-.464 1.208-.946.587-.003 1.23-.269 2.26-.334.699-.058 1.574.267 2.577.2.025.134.063.198.114.333l.003.003c.391.778 1.113 1.132 1.884 1.071.771-.06 1.592-.536 2.257-1.306.631-.765 1.683-1.084 2.378-1.503.348-.199.629-.469.649-.853.023-.4-.2-.811-.714-1.376v-.097l-.003-.003c-.17-.2-.25-.535-.338-.926-.085-.401-.182-.786-.492-1.046h-.003c-.059-.054-.123-.067-.188-.135a.357.357 0 00-.19-.064c.431-1.278.264-2.55-.173-3.694-.533-1.41-1.465-2.638-2.175-3.483-.796-1.005-1.576-1.957-1.56-3.368.026-2.152.236-6.133-3.544-6.139zm.529 3.405h.013c.213 0 .396.062.584.198.19.135.33.332.438.533.105.259.158.459.166.724 0-.02.006-.04.006-.06v.105a.086.086 0 01-.004-.021l-.004-.024a1.807 1.807 0 01-.15.706.953.953 0 01-.213.335.71.71 0 00-.088-.042c-.104-.045-.198-.064-.284-.133a1.312 1.312 0 00-.22-.066c.05-.06.146-.133.183-.198.053-.128.082-.264.088-.402v-.02a1.21 1.21 0 00-.061-.4c-.045-.134-.101-.2-.183-.333-.084-.066-.167-.132-.267-.132h-.016c-.093 0-.176.03-.262.132a.8.8 0 00-.205.334 1.18 1.18 0 00-.09.4v.019c.002.089.008.179.02.267-.193-.067-.438-.135-.607-.202a1.635 1.635 0 01-.018-.2v-.02a1.772 1.772 0 01.15-.768c.082-.22.232-.406.43-.533a.985.985 0 01.594-.2zm-2.962.059h.036c.142 0 .27.048.399.135.146.129.264.288.344.465.09.199.14.4.153.667v.004c.007.134.006.2-.002.266v.08c-.03.007-.056.018-.083.024-.152.055-.274.135-.393.2.012-.09.013-.18.003-.267v-.015c-.012-.133-.04-.2-.082-.333a.613.613 0 00-.166-.267.248.248 0 00-.183-.064h-.021"/></svg>
-      <span><b>Linux</b><small>Coming soon · AppImage, deb, rpm</small></span>
-    </span>
-  </div>
+  <section id="download" class="dl-section" aria-labelledby="download-heading">
+    <h2 id="download-heading" class="sr-only">Download Cordė for macOS, Windows, and Linux</h2>
+    <div class="dl">
+      <a
+        class="dlb"
+        href="/download"
+        class:rec={recommendedOS === 'mac'}
+        data-os="mac"
+        onclick={(e) => { e.preventDefault(); openDownloadGuide('mac'); }}
+      >
+        <svg class="fi" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
+        <span><b>macOS</b><small>Download · Apple Silicon &amp; Intel</small></span>
+      </a>
+      <a
+        class="dlb"
+        href="https://github.com/corde-voice/corde-releases/releases/latest/download/Corde-setup.exe"
+        class:rec={recommendedOS === 'win'}
+        data-os="win"
+        onclick={() => openDownloadGuide('win')}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+        <span><b>Windows</b><small>Download · Windows 10 &amp; 11</small></span>
+      </a>
+      <span class="dlb" aria-disabled="true" data-os="linux">
+        <svg class="fi" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a.424.424 0 00-.11.135c-.26.268-.45.6-.663.839-.199.199-.485.267-.797.4-.313.136-.658.269-.864.68-.09.189-.136.394-.132.602 0 .199.027.4.055.536.058.399.116.728.04.97-.249.68-.28 1.145-.106 1.484.174.334.535.47.94.601.81.2 1.91.135 2.774.6.926.466 1.866.67 2.616.47.526-.116.97-.464 1.208-.946.587-.003 1.23-.269 2.26-.334.699-.058 1.574.267 2.577.2.025.134.063.198.114.333l.003.003c.391.778 1.113 1.132 1.884 1.071.771-.06 1.592-.536 2.257-1.306.631-.765 1.683-1.084 2.378-1.503.348-.199.629-.469.649-.853.023-.4-.2-.811-.714-1.376v-.097l-.003-.003c-.17-.2-.25-.535-.338-.926-.085-.401-.182-.786-.492-1.046h-.003c-.059-.054-.123-.067-.188-.135a.357.357 0 00-.19-.064c.431-1.278.264-2.55-.173-3.694-.533-1.41-1.465-2.638-2.175-3.483-.796-1.005-1.576-1.957-1.56-3.368.026-2.152.236-6.133-3.544-6.139zm.529 3.405h.013c.213 0 .396.062.584.198.19.135.33.332.438.533.105.259.158.459.166.724 0-.02.006-.04.006-.06v.105a.086.086 0 01-.004-.021l-.004-.024a1.807 1.807 0 01-.15.706.953.953 0 01-.213.335.71.71 0 00-.088-.042c-.104-.045-.198-.064-.284-.133a1.312 1.312 0 00-.22-.066c.05-.06.146-.133.183-.198.053-.128.082-.264.088-.402v-.02a1.21 1.21 0 00-.061-.4c-.045-.134-.101-.2-.183-.333-.084-.066-.167-.132-.267-.132h-.016c-.093 0-.176.03-.262.132a.8.8 0 00-.205.334 1.18 1.18 0 00-.09.4v.019c.002.089.008.179.02.267-.193-.067-.438-.135-.607-.202a1.635 1.635 0 01-.018-.2v-.02a1.772 1.772 0 01.15-.768c.082-.22.232-.406.43-.533a.985.985 0 01.594-.2zm-2.962.059h.036c.142 0 .27.048.399.135.146.129.264.288.344.465.09.199.14.4.153.667v.004c.007.134.006.2-.002.266v.08c-.03.007-.056.018-.083.024-.152.055-.274.135-.393.2.012-.09.013-.18.003-.267v-.015c-.012-.133-.04-.2-.082-.333a.613.613 0 00-.166-.267.248.248 0 00-.183-.064h-.021"/></svg>
+        <span><b>Linux</b><small>Coming soon · AppImage, deb, rpm</small></span>
+      </span>
+    </div>
+  </section>
+
+  <!-- INTERACTIVE 3D MASCOT & WAKE WORD / KITTEN TTS SHOWCASE -->
+  <section id="buddy" class="buddy-section" aria-labelledby="buddy-heading">
+    <div class="hd">
+      <span class="sec-pill">INTERACTIVE 3D COMPANION · KITTEN TTS</span>
+      <h2 id="buddy-heading">A Living Desktop Buddy That Speaks Your Language</h2>
+      <p>
+        Cordė floats lightly in the corner of your screen, wakes up when you call its name, and replies with studio-grade 48kHz offline voices.
+      </p>
+    </div>
+
+    <div class="buddy-showcase">
+      <div class="buddy-stage-card">
+        <div class="buddy-stage-top">
+          <span class="buddy-status-chip" data-mode={mascotMode}>
+            <i></i>
+            {mascotMode === "greeting"
+              ? `Wake Triggered · “Hey ${customBuddyName}”`
+              : mascotMode === "listening"
+                ? "Voice Activity Detected · Recording"
+                : mascotMode === "thinking"
+                  ? "Local Qwen3-1.7B · Answering Offline"
+                  : mascotMode === "sleeping"
+                    ? "Battery Saver · Sleeping"
+                    : "Standby · < 50 MB RAM"}
+          </span>
+          <span class="buddy-drag-hint">Drag 3D model to rotate</span>
+        </div>
+
+        <div class="buddy-speech-bubble" aria-live="polite">
+          <strong>{customBuddyName}:</strong> “{mascotBubbleText}”
+        </div>
+
+        <div class="buddy-canvas-wrap">
+          <MascotShowcase mode={mascotMode} pulseTrigger={mascotPulse} />
+        </div>
+
+        <div class="buddy-state-bar" role="group" aria-label="Preview 3D mascot states">
+          <button type="button" class:active={mascotMode === "greeting"} onclick={() => setMascotState("greeting")}>👋 “Hey {customBuddyName}”</button>
+          <button type="button" class:active={mascotMode === "listening"} onclick={() => setMascotState("listening")}>🎙️ Listening</button>
+          <button type="button" class:active={mascotMode === "thinking"} onclick={() => setMascotState("thinking")}>🧠 AI Answer</button>
+          <button type="button" class:active={mascotMode === "idle"} onclick={() => setMascotState("idle")}>✨ Idle</button>
+          <button type="button" class:active={mascotMode === "sleeping"} onclick={() => setMascotState("sleeping")}>💤 Sleep</button>
+        </div>
+      </div>
+
+      <div class="buddy-controls-col">
+        <div class="buddy-feature-box">
+          <small class="buddy-eyebrow">1 · RENAME YOUR BUDDY &amp; WAKE PHRASE</small>
+          <h3>Call it “Hey Cordė” — or name it anything</h3>
+          <p>
+            Give your companion a custom name in Settings. A 3-step local acoustic &amp; Whisper calibration learns how you say <em>“Hey Mark”</em>, <em>“Hey Luna”</em>, or <em>“Hey Cordė”</em> without ever saving voiceprints to the cloud.
+          </p>
+          <div class="buddy-name-pills">
+            <button
+              type="button"
+              class="name-pill"
+              class:active={customBuddyName === "Cordė"}
+              onclick={() => playVoiceSample(selectedVoice, "Cordė")}
+            >
+              Wake phrase: <b>“Hey Cordė”</b>
+            </button>
+            <button
+              type="button"
+              class="name-pill"
+              class:active={customBuddyName === "Mark"}
+              onclick={() => playVoiceSample(selectedVoice, "Mark")}
+            >
+              Custom name: <b>“Hey Mark”</b>
+            </button>
+          </div>
+        </div>
+
+        <div class="buddy-feature-box">
+          <small class="buddy-eyebrow">2 · HEAR THE 3 BUNDLED OFFLINE VOICES (KITTEN TTS)</small>
+          <h3>Natural spoken replies — zero network lag</h3>
+          <p>
+            Choose from three expressive offline voices. Cordė greets you on wake (<em>“Hi! I'm listening”</em>), confirms when your prompt lands (<em>“I've sent that!”</em>), and speaks AI answers aloud.
+          </p>
+          <div class="voice-grid">
+            {#each (["jasper", "bella", "luna"] as const) as vKey}
+              <button
+                type="button"
+                class="voice-btn"
+                class:active={selectedVoice === vKey}
+                onclick={() => playVoiceSample(vKey)}
+              >
+                <span class="voice-play-icon" aria-hidden="true">
+                  {selectedVoice === vKey && isPlayingVoice ? "🔊" : "▶"}
+                </span>
+                <span class="voice-info">
+                  <b>{VOICE_META[vKey].label}</b>
+                  <small>{VOICE_META[vKey].tag}</small>
+                </span>
+              </button>
+            {/each}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OFFLINE AI ASSISTANT SECTION (From Cordė Optional Offline AI Assistant PRD v1.0) -->
+  <section id="offline-ai" class="ai-section" aria-labelledby="offline-ai-heading">
+    <div class="hd">
+      <span class="sec-pill">OPTIONAL ON-DEVICE AI MODULE · QWEN3-1.7B</span>
+      <h2 id="offline-ai-heading">Your Optional Offline AI Assistant. Zero Installer Bloat.</h2>
+      <p>
+        Need more than dictation? Flip on the <strong>Offline AI Assistant</strong> in Settings to ask coding questions, clean up speech, and trigger safe voice commands—powered locally by <strong>Qwen3-1.7B</strong> (Apache 2.0).
+      </p>
+    </div>
+
+    <div class="ai-hero-banner">
+      <div class="ai-banner-copy">
+        <span class="ai-tag">OFF BY DEFAULT · DOWNLOADED ONLY ON DEMAND</span>
+        <h3>Small installer today. Full local brain when you want it.</h3>
+        <p>
+          The ~1.1 GB quantized <code>Qwen3-1.7B</code> GGUF model is <strong>never bundled</strong> with the Cordė installer. When you switch the AI toggle on, Cordė checks your free disk space, shows the exact storage path, verifies the SHA-256 checksum, and runs 100% offline forever after.
+        </p>
+        <ul class="ai-guarantees">
+          <li><span>✓</span> <strong>One-time verified download:</strong> Resumable download with Pause/Cancel. Delete anytime with one click to free 1.1 GB.</li>
+          <li><span>✓</span> <strong>Zero dictation slowdown:</strong> Queued on dedicated background threads via <code>llama.cpp</code> so Whisper dictation stays instant.</li>
+          <li><span>✓</span> <strong>Auto-unload memory saver:</strong> Automatically unloads after 10 minutes of inactivity to keep laptop RAM free.</li>
+        </ul>
+      </div>
+
+      <div class="ai-settings-mock" aria-label="Preview of Settings AI Section">
+        <div class="ai-mock-header">
+          <span>Settings → AI Assistant</span>
+          <span class="ai-mock-status">Ready · Offline</span>
+        </div>
+        <div class="ai-mock-row">
+          <div>
+            <b>Offline AI assistant</b>
+            <small>Ask questions &amp; give voice commands without internet</small>
+          </div>
+          <span class="ai-toggle-pill" aria-hidden="true"><i></i></span>
+        </div>
+        <div class="ai-mock-meta">
+          <div><span>Model</span><b>Qwen3-1.7B (Q4_K_M GGUF)</b></div>
+          <div><span>Size on disk</span><b>1.12 GB · SHA-256 Verified</b></div>
+          <div><span>License</span><b>Apache 2.0 · 100% Local</b></div>
+        </div>
+        <div class="ai-mock-checks">
+          <span>✓ Ask before running commands (On)</span>
+          <span>○ Thinking mode (deeper reasoning)</span>
+        </div>
+        <div class="ai-mock-actions">
+          <span class="ai-mock-btn">Open folder</span>
+          <span class="ai-mock-btn danger">Delete model (frees 1.1 GB)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid ai-capabilities-grid">
+      <div class="card">
+        <div class="ai-cap-badge">SAFETY FIRST</div>
+        <h3>Confirmed Voice Commands</h3>
+        <p>
+          Map speech to structured actions (run tests, open project, send, new line). Cordė always shows shell commands for confirmation first—and destructive commands <em>always</em> require approval.
+        </p>
+      </div>
+      <div class="card">
+        <div class="ai-cap-badge">CLI &amp; CODE HELP</div>
+        <h3>Terminal &amp; Error Explainer</h3>
+        <p>
+          Say <em>“Hey Cordė, explain this compiler error”</em> or ask for a git command, regex, or commit message. Tokens stream live to your screen and can be spoken aloud by Kitten TTS.
+        </p>
+      </div>
+      <div class="card">
+        <div class="ai-cap-badge">SMART TEXT</div>
+        <h3>Dictation Cleanup &amp; Rewrite</h3>
+        <p>
+          Enable optional cleanup to strip filler words and fix punctuation before insertion, or say <em>“make that shorter”</em>, <em>“summarize this”</em>, or <em>“reply to this”</em> on copied text.
+        </p>
+      </div>
+    </div>
+  </section>
 
   <div class="works">
-    <p>Works with every coding agent and terminal</p>
+    <p>Works with every coding agent, IDE, and terminal</p>
     <div class="mq" id="mq1">
       <div class="tr">
         <div class="set">
@@ -379,18 +727,18 @@
     </div>
   </div>
 
-  <section id="features">
+  <section id="features" aria-labelledby="features-heading">
     <div class="hd">
-      <h2>Everything You Need to Talk to Your Terminal</h2>
-      <p>A small, fast desktop app built for real daily use, not just a demo.</p>
+      <h2 id="features-heading">Built for Real Daily Flow, Not Just a Demo</h2>
+      <p>Featherweight Rust &amp; Tauri architecture that respects your RAM, battery, and privacy.</p>
     </div>
     <div class="grid">
       <div class="card hot" style="--i: 0">
         <div class="fv">
           <div class="kc"><span>Ctrl</span><span>Shift</span><span>V</span></div>
         </div>
-        <h3>Global hotkey</h3>
-        <p>Hold to talk or toggle. Rebindable.</p>
+        <h3>Wake Word or Global Hotkey</h3>
+        <p>Say “Hey Cordė” hands-free or hold/tap your custom shortcut on macOS &amp; Windows.</p>
       </div>
       <div class="card" style="--i: 1">
         <div class="fv">
@@ -404,8 +752,8 @@
             </g>
           </svg>
         </div>
-        <h3>On-device speech</h3>
-        <p>Speech is transcribed on-device and audio is never uploaded.</p>
+        <h3>100% On-Device Speech &amp; AI</h3>
+        <p>Whisper speech recognition, Kitten TTS voices, and Qwen3 AI all run locally on your machine.</p>
       </div>
       <div class="card" style="--i: 0">
         <div class="fv">
@@ -420,8 +768,8 @@
             <rect class="ty t2" x="16" y="42" width="48" height="5" rx="2.5" fill="#8d8dab"/>
           </svg>
         </div>
-        <h3>Types anywhere</h3>
-        <p>Types at your cursor in any window.</p>
+        <h3>Types Anywhere + Speaks Back</h3>
+        <p>Injects words right at your cursor and confirms aloud with natural 48kHz voices.</p>
       </div>
       <div class="card" style="--i: 1">
         <div class="fv">
@@ -431,8 +779,8 @@
             <text x="60" y="37" text-anchor="middle" fill="#fff" font-size="14" font-weight="700" font-family="Inter,Arial,sans-serif">&lt;1s</text>
           </svg>
         </div>
-        <h3>Sub-second speed</h3>
-        <p>Text appears in under a second.</p>
+        <h3>Sub-Second Latency</h3>
+        <p>Hardware-tuned Whisper Tiny &amp; Base models transcribe in under a second.</p>
       </div>
       <div class="card" style="--i: 0">
         <div class="fv">
@@ -444,8 +792,8 @@
             <text x="38" y="48" fill="#fff" font-size="8" font-weight="600" font-family="Inter,Arial,sans-serif">&lt; 50 MB</text>
           </svg>
         </div>
-        <h3>Featherweight</h3>
-        <p>Idle memory under 50 MB.</p>
+        <h3>Featherweight &amp; Battery-Aware</h3>
+        <p>Idle memory under 50 MB and automatically pauses wake listening on Battery Saver.</p>
       </div>
       <div class="card" style="--i: 1">
         <div class="fv">
@@ -461,26 +809,26 @@
             <i class="s"></i><i class="s"></i><i class="s"></i>
           </div>
         </div>
-        <h3>Voice activity detection</h3>
-        <p>Silence ignored. Only your words typed.</p>
+        <h3>Smart Silence &amp; VAD</h3>
+        <p>Auto-stops after silence and ignores background noise so only your words land.</p>
       </div>
     </div>
   </section>
 
-  <section id="how" style="padding-top:20px">
+  <section id="how-it-works" style="padding-top:20px" aria-labelledby="how-heading">
     <div class="hd">
-      <h2>Three Steps. No New Workflow.</h2>
-      <p>Cordė sits in your system tray until you call it.</p>
+      <h2 id="how-heading">Three Steps. Hands-Free or Shortcut.</h2>
+      <p>Your AI buddy stays quietly in the tray or corner of your desktop until you call it.</p>
     </div>
     <div class="bento">
       <div class="tile t2">
-        <h3>1 · Press the shortcut</h3>
-        <p>Hold to talk or tap to toggle. A subtle tray indicator shows when it's listening.</p>
+        <h3>1 · Say “Hey Cordė” or press shortcut</h3>
+        <p>Wake your 3D buddy hands-free or tap <code>Ctrl+Shift+V</code> (<code>⌘+Shift+V</code> on Mac). Cordė waves and greets you.</p>
         <div class="vis"><div class="orb"></div></div>
       </div>
       <div class="tile t2">
-        <h3>2 · Speak naturally</h3>
-        <p>A local Whisper model transcribes as you talk.</p>
+        <h3>2 · Speak your prompt or question</h3>
+        <p>Local Whisper transcribes your speech on-device with smart silence detection.</p>
         <div class="vis">
           <div class="eq">
             {#each eqBars as height, i}
@@ -490,47 +838,47 @@
         </div>
       </div>
       <div class="tile t2">
-        <h3>3 · It types for you</h3>
-        <p>Your words land at the cursor, ready to send to your agent.</p>
-        <div class="vis"><div class="mini"><b>&gt;</b> refactor the auth middleware…<br><em>✓</em> typed by Cordė</div></div>
+        <h3>3 · Instant typing or offline AI reply</h3>
+        <p>Your words land at the cursor with a spoken <em>“I've sent that!”</em>—or your local Qwen3 assistant answers right on screen.</p>
+        <div class="vis"><div class="mini"><b>&gt;</b> refactor the auth middleware…<br><em>✓</em> “I've sent that!” · Cordė</div></div>
       </div>
     </div>
   </section>
 
-  <section id="teams" style="padding-top:20px">
+  <section id="use-cases" style="padding-top:20px" aria-labelledby="use-cases-heading">
     <div class="hd">
-      <h2>Designed for Developers Who Live in the CLI</h2>
-      <p>From long agent prompts to quick commands, speaking is faster than typing.</p>
+      <h2 id="use-cases-heading">Designed for Developers Who Live in the CLI</h2>
+      <p>From long agent prompts to quick offline questions, speaking is 3× faster than typing.</p>
     </div>
     <div class="bento">
       <div class="tile t3">
-        <h3>Agent prompting</h3>
-        <p>Dictate long, detailed instructions to Claude Code and other CLI agents without breaking flow.</p>
+        <h3>Hands-free agent prompting</h3>
+        <p>Dictate rich architectural context to Claude Code, Cursor, Gemini CLI, and OpenCode without touching the keyboard.</p>
         <div class="vis"><div class="mini"><b>&gt;</b> add per-user rate limiting and write tests for every edge case<span class="cur"></span></div></div>
       </div>
       <div class="tile t3">
-        <h3>Private by design</h3>
-        <p>Speech is transcribed locally and audio isn't uploaded. Account, subscription, and license checks need internet access.</p>
+        <h3>100% Private by design</h3>
+        <p>Wake detection, Whisper transcription, Kitten TTS voices, and Qwen3-1.7B inference never upload your voice or text anywhere.</p>
         <div class="vis">
           <div class="chips">
-            <span>Local speech</span><span>No audio uploads</span><span>No API key</span><span>Internet for license</span>
+            <span>Local Whisper</span><span>Local Qwen3-1.7B</span><span>Kitten TTS</span><span>Zero cloud AI</span><span>No API keys</span>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="pricing">
+  <section id="pricing" aria-labelledby="pricing-heading">
     <div class="hd">
-      <h2>Simple Pricing</h2>
-      <p>Confirmed prices. Payments and account features are not available yet.</p>
+      <h2 id="pricing-heading">Simple Pricing</h2>
+      <p>Start with a 7-day free trial. Every plan includes unlimited local dictation, wake word, 3D buddy, and offline AI.</p>
     </div>
     <div class="price">
       <div class="plan pop">
         <small class="plan-label">FREE TRIAL</small>
         <h3>Try Cordė</h3>
         <strong class="plan-price">7 days</strong>
-        <p class="plan-detail">Free</p>
+        <p class="plan-detail">Full access · Free</p>
         <span class="trial-tag">No credit card required</span>
       </div>
       <div class="plan">
@@ -546,18 +894,32 @@
         <p class="plan-detail">Per year after the free trial.</p>
       </div>
     </div>
-    <p class="pricing-status">All plans include unlimited local dictation on macOS, Windows, and Linux. One active device per account; device deactivation and transfer are planned.</p>
-    <p class="legal-note">Payment, account, and license features are not available yet. Billing, device, and license terms require owner/legal review.</p>
+    <p class="pricing-status">All plans include unlimited local dictation, custom wake phrases, Kitten TTS voices, and the optional Qwen3-1.7B offline AI assistant on macOS and Windows.</p>
   </section>
 
-  <section id="faq" style="padding-top:20px">
-    <div class="hd"><h2>Questions</h2></div>
+  <section id="faq" style="padding-top:20px" aria-labelledby="faq-heading">
+    <div class="hd"><h2 id="faq-heading">Questions &amp; Install Guides</h2></div>
     <div class="faq">
-      <details><summary>Does my voice leave my computer?</summary><p>Speech recognition runs locally, and audio isn't uploaded for transcription. Account, subscription, and license checks require an internet connection.</p></details>
-      <details><summary>Which apps does it work with?</summary><p>Any app that accepts keyboard input. It was designed for terminals and CLI agents like Claude Code.</p></details>
-      <details><summary>How accurate is it?</summary><p>It uses OpenAI's Whisper models in an optimized runtime. Smaller models are faster, and you can pick a larger one for more accuracy.</p></details>
-      <details><summary>How much does Cordė cost?</summary><p>Cordė includes a 7-day free trial with no credit card required. After the trial, prices are $2.99/month or $34.99/year. Payments aren't available yet. Once subscriptions launch, an active plan will be required to dictate; the planned upgrade prompt appears when you try to dictate, not on every app launch. Existing transcripts and settings won't be deleted or locked.</p></details>
-      <details><summary>Can I use Cordė on a replacement device?</summary><p>The plan allows one active device per account. A way to deactivate or transfer activation when replacing a device is planned; account and license features aren't available yet.</p></details>
+      <details>
+        <summary>Does my voice or AI conversation ever leave my computer?</summary>
+        <p>Never. Wake-word detection, Whisper speech recognition, Kitten TTS voice replies, and the optional Qwen3-1.7B AI assistant all run 100% locally on your device. After the optional one-time AI model download, nothing you say or the assistant answers is sent anywhere. Only account and subscription license checks use the internet.</p>
+      </details>
+      <details>
+        <summary>How does the optional Offline AI Assistant work without bloating the installer?</summary>
+        <p>The Qwen3-1.7B model (~1.1 GB quantized GGUF, licensed Apache 2.0) is <strong>not bundled</strong> with the installer. In <strong>Settings → AI</strong>, the toggle is off by default. When you turn it on, Cordė checks your available disk space, asks for confirmation, downloads and verifies the file by SHA-256 checksum, and runs it locally via <code>llama.cpp</code>. You can turn it off or click <strong>Delete model (frees 1.1 GB)</strong> at any time.</p>
+      </details>
+      <details>
+        <summary>Can I rename my AI buddy and customize the wake phrase?</summary>
+        <p>Yes! By default you can say <strong>“Hey Cordė”</strong>, or you can rename your 3D mascot in Settings (for example, <em>“Mark”</em> or <em>“Luna”</em>) and calibrate how you pronounce it in 3 quick utterances. Your buddy will even introduce itself by its new name using your chosen Kitten TTS voice (Jasper, Bella, or Luna).</p>
+      </details>
+      <details>
+        <summary>Will the Offline AI Assistant slow down my terminal dictation?</summary>
+        <p>No. Whisper transcription and the Qwen3 language model are queued on separate threads so they never contend for CPU cores, and the AI model automatically unloads after 10 minutes of inactivity to free RAM.</p>
+      </details>
+      <details>
+        <summary>Which terminals and apps does Cordė work with?</summary>
+        <p>Any application that accepts keyboard input on macOS and Windows—including Claude Code, Cursor, Gemini CLI, OpenCode, Warp, iTerm2, Ghostty, VS Code, Windows Terminal, Alacritty, Neovim, and Zed.</p>
+      </details>
       <details>
         <summary>How do I open Cordė on macOS if I see a security popup?</summary>
         <p>
@@ -576,26 +938,61 @@
           3. Click <strong>Run anyway</strong> to complete the installation. You only need to do this once!
         </p>
       </details>
-      <details><summary>How do I say the name?</summary><p>“Cord-ay”.</p></details>
+      <details>
+        <summary>How much does Cordė cost and how do I pronounce the name?</summary>
+        <p>Cordė is pronounced <strong>“Cord-ay”</strong>. Every download starts with a 7-day free trial (no credit card required), then $2.99/month or $34.99/year.</p>
+      </details>
     </div>
   </section>
 
   <section style="padding-top:20px">
     <div class="final">
-      <h2>Stop typing. Start speaking.</h2>
-      <a class="btn lg" href="#pricing">View pricing</a>
+      <h2>Your terminal has a voice—and an offline brain.</h2>
+      <p class="final-sub">Download Cordė for macOS or Windows and try your offline AI buddy free for 7 days.</p>
+      <div class="cta">
+        <a class="btn lg" href="/download" onclick={(e) => navigateSection(e, '/download', 'download')}>Download Cordė free</a>
+        <a class="btn lg ghost" href="/pricing" onclick={(e) => navigateSection(e, '/pricing', 'pricing')}>View pricing</a>
+      </div>
     </div>
   </section>
 
   <footer>
-    <div>© Cordė · Voice to terminal</div>
-    <div>Code at the speed of thought.</div>
-    <a class="footer-release-link" href="https://github.com/corde-voice/corde-releases/releases/latest" target="_blank" rel="noopener noreferrer">
-      Download Cordė for macOS &amp; Windows
-    </a>
-    <a class="footer-release-link" href="https://x.com/Corde_dex" target="_blank" rel="noopener noreferrer">
-      Follow on X @Corde_dex
-    </a>
+    <div class="footer-top">
+      <div class="footer-brand-col">
+        <a class="brand" href="/" onclick={(e) => navigateSection(e, '/', 'top')}>
+          <img src={cordeLogo} alt="Cordė logo" />Cordė
+        </a>
+        <p>Your 100% offline AI buddy for voice dictation, custom wake phrases, natural Kitten TTS replies, and local Qwen3-1.7B assistance.</p>
+      </div>
+      <nav class="footer-sitemap" aria-label="Website Sections Directory">
+        <div>
+          <strong>Product &amp; AI</strong>
+          <a href="/buddy" onclick={(e) => navigateSection(e, '/buddy', 'buddy')}>3D AI Buddy &amp; Voices</a>
+          <a href="/offline-ai" onclick={(e) => navigateSection(e, '/offline-ai', 'offline-ai')}>Offline AI Assistant (Qwen3)</a>
+          <a href="/features" onclick={(e) => navigateSection(e, '/features', 'features')}>Core Features</a>
+          <a href="/how-it-works" onclick={(e) => navigateSection(e, '/how-it-works', 'how-it-works')}>How It Works</a>
+        </div>
+        <div>
+          <strong>Developers &amp; Plans</strong>
+          <a href="/use-cases" onclick={(e) => navigateSection(e, '/use-cases', 'use-cases')}>CLI &amp; Agent Use Cases</a>
+          <a href="/download" onclick={(e) => navigateSection(e, '/download', 'download')}>Download (macOS &amp; Windows)</a>
+          <a href="/pricing" onclick={(e) => navigateSection(e, '/pricing', 'pricing')}>Pricing &amp; Free Trial</a>
+          <a href="/faq" onclick={(e) => navigateSection(e, '/faq', 'faq')}>FAQ &amp; Install Guides</a>
+        </div>
+      </nav>
+    </div>
+    <div class="footer-bottom">
+      <div>© {new Date().getFullYear()} Cordė · CRIZZYALGO LTD · Your Offline AI Buddy</div>
+      <div class="footer-ext-links">
+        <a class="footer-release-link" href="/sitemap.xml">Sitemap</a>
+        <a class="footer-release-link" href="https://github.com/corde-voice/corde-releases/releases/latest" target="_blank" rel="noopener noreferrer">
+          GitHub Releases
+        </a>
+        <a class="footer-release-link" href="https://x.com/Corde_dex" target="_blank" rel="noopener noreferrer">
+          Follow @Corde_dex
+        </a>
+      </div>
+    </div>
   </footer>
 
   {#if downloadGuideModal}
@@ -659,7 +1056,18 @@
 </div>
 
 <style>
-  /* Local overrides if needed, but most is in app.css */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
   .billing-success {
     display: grid;
     min-height: 100vh;
@@ -728,6 +1136,7 @@
   .keys {
     display: flex;
     gap: 6px;
+    align-items: center;
   }
 
   .dl-modal-backdrop {
@@ -744,7 +1153,7 @@
   .dl-modal-card {
     position: relative;
     width: min(100%, 490px);
-    padding: clamp(24px, 4vw, 34px);
+    padding: clamp(22px, 4vw, 34px);
     border: 1px solid rgba(143, 131, 255, 0.28);
     border-radius: 20px;
     background: rgba(14, 15, 36, 0.96);
@@ -822,6 +1231,7 @@
     background: transparent;
     padding: 0;
     color: #e6e2ff;
+    word-break: break-all;
   }
 
   .dl-modal-copy-btn {
@@ -874,5 +1284,11 @@
     width: 100%;
     justify-content: center;
     cursor: pointer;
+  }
+
+  @media (max-width: 480px) {
+    .dl-modal-btn-row {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

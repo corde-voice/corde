@@ -3,6 +3,38 @@
     {
       "source": "/auth/confirmed",
       "destination": "/"
+    },
+    {
+      "source": "/buddy",
+      "destination": "/"
+    },
+    {
+      "source": "/offline-ai",
+      "destination": "/"
+    },
+    {
+      "source": "/features",
+      "destination": "/"
+    },
+    {
+      "source": "/how-it-works",
+      "destination": "/"
+    },
+    {
+      "source": "/use-cases",
+      "destination": "/"
+    },
+    {
+      "source": "/download",
+      "destination": "/"
+    },
+    {
+      "source": "/pricing",
+      "destination": "/"
+    },
+    {
+      "source": "/faq",
+      "destination": "/"
     }
   ]
 }
