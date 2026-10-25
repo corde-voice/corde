@@ -77,8 +77,8 @@
 
         if (disposed) {
           gltf.scene.traverse((object) => {
-            if (object instanceof THREE.Mesh) {
-              object.geometry.dispose();
+            if ((object as any).isMesh) {
+              (object as any).geometry?.dispose?.();
             }
           });
           return;
@@ -89,8 +89,8 @@
 
         // Apply texture denoising (clamp KHR_materials_specular & normal spikes on black visor/chest)
         model.traverse((object) => {
-          if (object instanceof THREE.Mesh) {
-            const materials = Array.isArray(object.material) ? object.material : [object.material];
+          if ((object as any).isMesh) {
+            const materials = Array.isArray((object as any).material) ? (object as any).material : [(object as any).material];
             for (const mat of materials) {
               if (!mat) continue;
               if ("map" in mat && mat.map) {
