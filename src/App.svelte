@@ -303,10 +303,10 @@
   <div class="dl" id="download">
     <a
       class="dlb"
-      href="https://github.com/corde-voice/corde-releases/releases/latest/download/Corde-macos-aarch64.dmg"
+      href="#download"
       class:rec={recommendedOS === 'mac'}
       data-os="mac"
-      onclick={() => openDownloadGuide('mac')}
+      onclick={(e) => { e.preventDefault(); openDownloadGuide('mac'); }}
     >
       <svg class="fi" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
       <span><b>macOS</b><small>Download · Apple Silicon &amp; Intel</small></span>
@@ -611,7 +611,7 @@
       <div class="dl-modal-card">
         <button class="dl-modal-close" type="button" aria-label="Close instructions" onclick={closeDownloadGuide}>✕</button>
         {#if downloadGuideModal === 'mac'}
-          <p class="dl-modal-eyebrow">DOWNLOADING CORDĖ FOR MACOS</p>
+          <p class="dl-modal-eyebrow">DOWNLOAD CORDĖ FOR MACOS</p>
           <h3 id="dl-modal-title">First-time launch on macOS:</h3>
           <ol class="dl-modal-steps">
             <li>Open the <code>.dmg</code> and drag <strong>Cordė</strong> into <strong>Applications</strong>.</li>
@@ -626,9 +626,22 @@
               </div>
             </li>
           </ol>
-          <p class="dl-modal-alt">
-            Using an Intel Mac? <a href="https://github.com/corde-voice/corde-releases/releases/latest/download/Corde-macos-x64.dmg">Download Intel (.dmg)</a>
-          </p>
+          <div class="dl-modal-btn-row">
+            <a
+              class="btn dl-modal-arch-btn"
+              href="https://github.com/corde-voice/corde-releases/releases/latest/download/Corde-macos-aarch64.dmg"
+            >
+              <strong>Apple Silicon</strong>
+              <small>M1, M2, M3, M4 (.dmg)</small>
+            </a>
+            <a
+              class="btn ghost dl-modal-arch-btn"
+              href="https://github.com/corde-voice/corde-releases/releases/latest/download/Corde-macos-x64.dmg"
+            >
+              <strong>Intel Mac</strong>
+              <small>x86_64 (.dmg)</small>
+            </a>
+          </div>
         {:else}
           <p class="dl-modal-eyebrow">DOWNLOADING CORDĖ FOR WINDOWS</p>
           <h3 id="dl-modal-title">First-time launch on Windows:</h3>
@@ -637,8 +650,8 @@
             <li>If Windows Defender SmartScreen shows <em>“Windows protected your PC”</em>, click <strong>More info</strong>.</li>
             <li>Click <strong>Run anyway</strong> to complete the installation. You only need to do this once!</li>
           </ol>
+          <button type="button" class="btn dl-modal-done" onclick={closeDownloadGuide}>Got it</button>
         {/if}
-        <button type="button" class="btn dl-modal-done" onclick={closeDownloadGuide}>Got it</button>
       </div>
     </div>
   {/if}
@@ -827,16 +840,34 @@
     background: rgba(143, 131, 255, 0.32);
   }
 
-  .dl-modal-alt {
-    margin: 0 0 18px;
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 13px;
+  .dl-modal-btn-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 6px;
   }
 
-  .dl-modal-alt a {
-    color: #b9b0ff;
-    text-decoration: underline;
-    text-underline-offset: 3px;
+  .dl-modal-arch-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    text-align: center;
+    text-decoration: none;
+  }
+
+  .dl-modal-arch-btn strong {
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .dl-modal-arch-btn small {
+    font-size: 11.5px;
+    opacity: 0.78;
+    font-weight: 500;
   }
 
   .dl-modal-done {
