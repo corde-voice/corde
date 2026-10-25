@@ -32,7 +32,7 @@
       : mascotMode === "listening"
         ? `Listening to your terminal prompt…`
         : mascotMode === "thinking"
-          ? `Qwen3-1.7B (Offline): "Use git rebase -i HEAD~3 to squash those commits safely."`
+          ? `Cordė AI: "Use git rebase -i HEAD~3 to squash those commits safely."`
           : mascotMode === "sleeping"
             ? `Zzz… Paused on Battery Saver (< 50 MB RAM)`
             : `Say "Hey ${customBuddyName}" anytime!`;
@@ -75,7 +75,7 @@
     "/": {
       id: "top",
       title: "Cordė — Your Offline AI Buddy for the Terminal & Desktop",
-      description: "Meet Cordė, your 100% offline AI buddy for macOS and Windows. Hands-free custom wake phrase, sub-second local Whisper dictation, expressive 3D desktop companion with natural Kitten TTS voices, and an optional on-device Qwen3-1.7B AI assistant."
+      description: "Meet Cordė, your 100% offline AI buddy for macOS and Windows. Hands-free custom wake phrase, sub-second local dictation, expressive 3D desktop companion with natural offline voices, and an optional on-device AI assistant."
     },
     "/buddy": {
       id: "buddy",
@@ -84,13 +84,13 @@
     },
     "/offline-ai": {
       id: "offline-ai",
-      title: "Optional Offline AI Assistant (Qwen3-1.7B) | Cordė",
-      description: "Ask questions, clean up dictation, explain terminal errors, and run confirmed voice commands 100% offline with Qwen3-1.7B. Opt-in 1.1 GB download with zero installer bloat."
+      title: "Optional Offline AI Assistant | Cordė",
+      description: "Ask questions, clean up dictation, explain terminal errors, and run confirmed voice commands 100% offline with Cordė's on-device AI assistant. Zero cloud uploads."
     },
     "/features": {
       id: "features",
-      title: "Features — Local Whisper, Wake Phrase & Offline Voices | Cordė",
-      description: "Global hotkey, hands-free wake word, on-device Whisper speech recognition, Kitten TTS voices, sub-second speed, and under 50 MB idle RAM."
+      title: "Features — Local Dictation, Wake Phrase & Offline Voices | Cordė",
+      description: "Global hotkey, hands-free wake word, on-device speech recognition, studio-grade voices, sub-second speed, and under 50 MB idle RAM."
     },
     "/how-it-works": {
       id: "how-it-works",
@@ -115,7 +115,7 @@
     "/faq": {
       id: "faq",
       title: "FAQ & macOS / Windows First-Time Launch Guides | Cordė",
-      description: "Answers on offline privacy, Qwen3-1.7B local AI model storage, custom wake words, macOS Gatekeeper launch steps, and Windows SmartScreen installation."
+      description: "Answers on offline privacy, on-device AI assistant storage, custom wake words, macOS Gatekeeper launch steps, and Windows SmartScreen installation."
     }
   };
 
@@ -413,7 +413,7 @@
           <div class="nav-dropdown-col">
             <span class="nav-group-title">Product &amp; AI</span>
             <a href="/buddy" onclick={(e) => navigateSection(e, '/buddy', 'buddy')}>3D AI Buddy &amp; Voices</a>
-            <a href="/offline-ai" onclick={(e) => navigateSection(e, '/offline-ai', 'offline-ai')}>Offline AI Assistant (Qwen3)</a>
+            <a href="/offline-ai" onclick={(e) => navigateSection(e, '/offline-ai', 'offline-ai')}>Offline AI Assistant</a>
             <a href="/features" onclick={(e) => navigateSection(e, '/features', 'features')}>Core Features</a>
             <a href="/how-it-works" onclick={(e) => navigateSection(e, '/how-it-works', 'how-it-works')}>How It Works</a>
           </div>
@@ -435,7 +435,7 @@
         <div class="mobile-menu-group">
           <span class="nav-group-title">Product &amp; AI</span>
           <a href="/buddy" onclick={(e) => navigateSection(e, '/buddy', 'buddy')}>3D AI Buddy &amp; Voices</a>
-          <a href="/offline-ai" onclick={(e) => navigateSection(e, '/offline-ai', 'offline-ai')}>Offline AI Assistant (Qwen3)</a>
+          <a href="/offline-ai" onclick={(e) => navigateSection(e, '/offline-ai', 'offline-ai')}>Offline AI Assistant</a>
           <a href="/features" onclick={(e) => navigateSection(e, '/features', 'features')}>Core Features</a>
           <a href="/how-it-works" onclick={(e) => navigateSection(e, '/how-it-works', 'how-it-works')}>How It Works</a>
         </div>
@@ -534,10 +534,10 @@
     </div>
   </section>
 
-  <!-- INTERACTIVE 3D MASCOT & WAKE WORD / KITTEN TTS SHOWCASE -->
+  <!-- INTERACTIVE 3D MASCOT & WAKE WORD SHOWCASE -->
   <section id="buddy" class="buddy-section" aria-labelledby="buddy-heading">
     <div class="hd">
-      <span class="sec-pill">INTERACTIVE 3D COMPANION · KITTEN TTS</span>
+      <span class="sec-pill">INTERACTIVE 3D COMPANION · NATURAL OFFLINE VOICES</span>
       <h2 id="buddy-heading">A Living Desktop Buddy That Speaks Your Language</h2>
       <p>
         Cordė floats lightly in the corner of your screen, wakes up when you call its name, and replies with studio-grade 48kHz offline voices.
@@ -554,7 +554,7 @@
               : mascotMode === "listening"
                 ? "Voice Activity Detected · Recording"
                 : mascotMode === "thinking"
-                  ? "Local Qwen3-1.7B · Answering Offline"
+                  ? "Cordė AI · Answering Offline"
                   : mascotMode === "sleeping"
                     ? "Battery Saver · Sleeping"
                     : "Standby · < 50 MB RAM"}
@@ -584,7 +584,7 @@
           <small class="buddy-eyebrow">1 · RENAME YOUR BUDDY &amp; WAKE PHRASE</small>
           <h3>Call it “Hey Cordė” — or name it anything</h3>
           <p>
-            Give your companion a custom name in Settings. A 3-step local acoustic &amp; Whisper calibration learns how you say <em>“Hey Mark”</em>, <em>“Hey Luna”</em>, or <em>“Hey Cordė”</em> without ever saving voiceprints to the cloud.
+            Give your companion a custom name in Settings. A 3-step local acoustic calibration learns how you say <em>“Hey Mark”</em>, <em>“Hey Luna”</em>, or <em>“Hey Cordė”</em> without ever saving voiceprints to the cloud.
           </p>
           <div class="buddy-name-pills">
             <button
@@ -607,7 +607,7 @@
         </div>
 
         <div class="buddy-feature-box">
-          <small class="buddy-eyebrow">2 · HEAR THE 3 BUNDLED OFFLINE VOICES (KITTEN TTS)</small>
+          <small class="buddy-eyebrow">2 · HEAR THE 3 BUNDLED OFFLINE VOICES</small>
           <h3>Natural spoken replies — zero network lag</h3>
           <p>
             Choose from three expressive offline voices. Cordė greets you on wake (<em>“Hi! I'm listening”</em>), confirms when your prompt lands (<em>“I've sent that!”</em>), and speaks AI answers aloud.
@@ -635,13 +635,13 @@
     </div>
   </section>
 
-  <!-- OFFLINE AI ASSISTANT SECTION (From Cordė Optional Offline AI Assistant PRD v1.0) -->
+  <!-- OFFLINE AI ASSISTANT SECTION -->
   <section id="offline-ai" class="ai-section" aria-labelledby="offline-ai-heading">
     <div class="hd">
-      <span class="sec-pill">OPTIONAL ON-DEVICE AI MODULE · QWEN3-1.7B</span>
+      <span class="sec-pill">OPTIONAL ON-DEVICE AI MODULE · 100% PRIVATE</span>
       <h2 id="offline-ai-heading">Your Optional Offline AI Assistant. Zero Installer Bloat.</h2>
       <p>
-        Need more than dictation? Flip on the <strong>Offline AI Assistant</strong> in Settings to ask coding questions, clean up speech, and trigger safe voice commands—powered locally by <strong>Qwen3-1.7B</strong> (Apache 2.0).
+        Need more than dictation? Flip on the <strong>Offline AI Assistant</strong> in Settings to ask coding questions, clean up speech, and trigger safe voice commands—powered 100% locally by Cordė's offline AI engine.
       </p>
     </div>
 
@@ -657,7 +657,7 @@
         <div class="ai-cap-badge">CLI &amp; CODE HELP</div>
         <h3>Terminal &amp; Error Explainer</h3>
         <p>
-          Say <em>“Hey Cordė, explain this compiler error”</em> or ask for a git command, regex, or commit message. Tokens stream live to your screen and can be spoken aloud by Kitten TTS.
+          Say <em>“Hey Cordė, explain this compiler error”</em> or ask for a git command, regex, or commit message. Tokens stream live to your screen and can be spoken aloud by Cordė.
         </p>
       </div>
       <div class="card">
@@ -748,7 +748,7 @@
           </svg>
         </div>
         <h3>100% On-Device Speech &amp; AI</h3>
-        <p>Whisper speech recognition, Kitten TTS voices, and Qwen3 AI all run locally on your machine.</p>
+        <p>Speech recognition, natural offline voices, and Cordė's AI assistant all run locally on your machine.</p>
       </div>
       <div class="card" style="--i: 0">
         <div class="fv">
@@ -834,7 +834,7 @@
       </div>
       <div class="tile t2">
         <h3>3 · Instant typing or offline AI reply</h3>
-        <p>Your words land at the cursor with a spoken <em>“I've sent that!”</em>—or your local Qwen3 assistant answers right on screen.</p>
+        <p>Your words land at the cursor with a spoken <em>“I've sent that!”</em>—or Cordė answers your questions right on screen.</p>
         <div class="vis"><div class="mini"><b>&gt;</b> refactor the auth middleware…<br><em>✓</em> “I've sent that!” · Cordė</div></div>
       </div>
     </div>
@@ -853,10 +853,10 @@
       </div>
       <div class="tile t3">
         <h3>100% Private by design</h3>
-        <p>Wake detection, Whisper transcription, Kitten TTS voices, and Qwen3-1.7B inference never upload your voice or text anywhere.</p>
+        <p>Wake detection, voice transcription, natural offline voices, and on-device AI inference never upload your voice or text anywhere.</p>
         <div class="vis">
           <div class="chips">
-            <span>Local Whisper</span><span>Local Qwen3-1.7B</span><span>Kitten TTS</span><span>Zero cloud AI</span><span>No API keys</span>
+            <span>On-device speech</span><span>Offline AI</span><span>Natural voices</span><span>Zero cloud AI</span><span>No API keys</span>
           </div>
         </div>
       </div>
@@ -889,7 +889,7 @@
         <p class="plan-detail">Per year after the free trial.</p>
       </div>
     </div>
-    <p class="pricing-status">All plans include unlimited local dictation, custom wake phrases, Kitten TTS voices, and the optional Qwen3-1.7B offline AI assistant on macOS and Windows.</p>
+    <p class="pricing-status">All plans include unlimited local dictation, custom wake phrases, natural offline voices, and the optional on-device AI assistant on macOS and Windows.</p>
   </section>
 
   <section id="faq" style="padding-top:20px" aria-labelledby="faq-heading">
@@ -897,19 +897,19 @@
     <div class="faq">
       <details>
         <summary>Does my voice or AI conversation ever leave my computer?</summary>
-        <p>Never. Wake-word detection, Whisper speech recognition, Kitten TTS voice replies, and the optional Qwen3-1.7B AI assistant all run 100% locally on your device. After the optional one-time AI model download, nothing you say or the assistant answers is sent anywhere. Only account and subscription license checks use the internet.</p>
+        <p>Never. Wake-word detection, speech recognition, offline voice replies, and the optional on-device AI assistant all run 100% locally on your machine. After the optional one-time AI model download, nothing you say or the assistant answers is sent anywhere. Only account and subscription license checks use the internet.</p>
       </details>
       <details>
         <summary>How does the optional Offline AI Assistant work without bloating the installer?</summary>
-        <p>The Qwen3-1.7B model (~1.1 GB quantized GGUF, licensed Apache 2.0) is <strong>not bundled</strong> with the installer. In <strong>Settings → AI</strong>, the toggle is off by default. When you turn it on, Cordė checks your available disk space, asks for confirmation, downloads and verifies the file by SHA-256 checksum, and runs it locally via <code>llama.cpp</code>. You can turn it off or click <strong>Delete model (frees 1.1 GB)</strong> at any time.</p>
+        <p>Cordė's offline AI assistant is <strong>not bundled</strong> with the installer, keeping the initial download lightweight. In <strong>Settings → AI</strong>, the toggle is off by default. When you turn it on, Cordė checks your available disk space, asks for confirmation, verifies the file integrity, and runs it locally on your computer. You can turn it off or delete the model with one click at any time.</p>
       </details>
       <details>
         <summary>Can I rename my AI buddy and customize the wake phrase?</summary>
-        <p>Yes! By default you can say <strong>“Hey Cordė”</strong>, or you can rename your 3D mascot in Settings (for example, <em>“Mark”</em> or <em>“Luna”</em>) and calibrate how you pronounce it in 3 quick utterances. Your buddy will even introduce itself by its new name using your chosen Kitten TTS voice (Jasper, Bella, or Luna).</p>
+        <p>Yes! By default you can say <strong>“Hey Cordė”</strong>, or you can rename your 3D mascot in Settings (for example, <em>“Mark”</em> or <em>“Luna”</em>) and calibrate how you pronounce it in 3 quick utterances. Your buddy will even introduce itself by its new name using your chosen voice (Jasper, Bella, or Luna).</p>
       </details>
       <details>
         <summary>Will the Offline AI Assistant slow down my terminal dictation?</summary>
-        <p>No. Whisper transcription and the Qwen3 language model are queued on separate threads so they never contend for CPU cores, and the AI model automatically unloads after 10 minutes of inactivity to free RAM.</p>
+        <p>No. Speech transcription and the offline language engine run on separate threads so they never contend for CPU cores, and the AI model automatically unloads after 10 minutes of inactivity to keep your RAM free.</p>
       </details>
       <details>
         <summary>Which terminals and apps does Cordė work with?</summary>
