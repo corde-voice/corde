@@ -558,6 +558,24 @@
       <details><summary>How accurate is it?</summary><p>It uses OpenAI's Whisper models in an optimized runtime. Smaller models are faster, and you can pick a larger one for more accuracy.</p></details>
       <details><summary>How much does Cordė cost?</summary><p>Cordė includes a 7-day free trial with no credit card required. After the trial, prices are $2.99/month or $34.99/year. Payments aren't available yet. Once subscriptions launch, an active plan will be required to dictate; the planned upgrade prompt appears when you try to dictate, not on every app launch. Existing transcripts and settings won't be deleted or locked.</p></details>
       <details><summary>Can I use Cordė on a replacement device?</summary><p>The plan allows one active device per account. A way to deactivate or transfer activation when replacing a device is planned; account and license features aren't available yet.</p></details>
+      <details>
+        <summary>How do I open Cordė on macOS if I see a security popup?</summary>
+        <p>
+          <strong>First-time launch on macOS:</strong><br/>
+          1. Open the <code>.dmg</code> and drag <strong>Cordė</strong> into <strong>Applications</strong>.<br/>
+          2. <strong>Right-click</strong> <strong>Cordė</strong> in Applications and select <strong>Open</strong> <em>(or on macOS Sequoia, go to <strong>System Settings → Privacy &amp; Security</strong> and click <strong>Open Anyway</strong>)</em>.<br/>
+          3. If macOS says the app cannot be opened, run <code>xattr -cr /Applications/Cordė.app</code> in Terminal. You only need to do this once!
+        </p>
+      </details>
+      <details>
+        <summary>How do I install Cordė on Windows if SmartScreen shows a popup?</summary>
+        <p>
+          <strong>First-time launch on Windows:</strong><br/>
+          1. Open the downloaded <code>Corde-setup.exe</code> installer.<br/>
+          2. If Windows Defender SmartScreen shows <em>“Windows protected your PC”</em>, click <strong>More info</strong>.<br/>
+          3. Click <strong>Run anyway</strong> to complete the installation. You only need to do this once!
+        </p>
+      </details>
       <details><summary>How do I say the name?</summary><p>“Cord-ay”.</p></details>
     </div>
   </section>
