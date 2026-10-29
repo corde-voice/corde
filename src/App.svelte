@@ -99,13 +99,13 @@
     },
     "/download": {
       id: "download",
-      title: "Download Cordė for macOS (Apple Silicon & Intel) & Windows | Cordė",
-      description: "Download the Cordė desktop app for macOS (.dmg for M1/M2/M3/M4 and Intel) and Windows 10 & 11 (.exe). Start your 7-day free trial."
+      title: "Download Cordė for Windows & macOS | Cordė",
+      description: "Download the Cordė desktop app for Windows 10 & 11 (.exe). macOS coming soon. Start your 5-day free trial."
     },
     "/pricing": {
       id: "pricing",
-      title: "Pricing — 7-Day Free Trial, $2.99/mo | Cordė",
-      description: "Try Cordė free for 7 days with no credit card required. Simple plans at $2.99/month or $34.99/year with unlimited offline dictation and AI buddy features."
+      title: "Pricing — 5-Day Free Trial, $2.99/mo | Cordė",
+      description: "Try Cordė free for 5 days with no credit card required. Simple plans at $2.99/month or $34.99/year with unlimited offline dictation and AI buddy features."
     },
     "/faq": {
       id: "faq",
@@ -298,7 +298,7 @@
 
     loop();
     const u = navigator.userAgent;
-    recommendedOS = /Android|iPhone|iPad/.test(u) ? "" : /Mac/.test(u) ? "mac" : /Win/.test(u) ? "win" : /Linux|X11/.test(u) ? "linux" : "";
+    recommendedOS = /Android|iPhone|iPad/.test(u) ? "" : /Win/.test(u) ? "win" : "";
 
     let previousScrollY = window.scrollY;
     const handleScroll = () => {
@@ -492,26 +492,20 @@
     </div>
     <a class="trial-card" href="/download" onclick={(e) => navigateSection(e, '/download', 'download')}>
       <span class="trial-card-copy">
-        <b>Try Cordė free for 7 days</b>
-        <small>macOS (Apple Silicon &amp; Intel) · Windows 10 &amp; 11 · No credit card required</small>
+        <b>Try Cordė free for 5 days</b>
+        <small>Windows 10 &amp; 11 · macOS coming soon · No credit card required</small>
       </span>
       <span class="trial-card-arrow" aria-hidden="true">→</span>
     </a>
   </header>
 
   <section id="download" class="dl-section" aria-labelledby="download-heading">
-    <h2 id="download-heading" class="sr-only">Download Cordė for macOS, Windows, and Linux</h2>
+    <h2 id="download-heading" class="sr-only">Download Cordė for Windows, macOS, and Linux</h2>
     <div class="dl">
-      <a
-        class="dlb"
-        href="/download"
-        class:rec={recommendedOS === 'mac'}
-        data-os="mac"
-        onclick={(e) => { e.preventDefault(); openDownloadGuide('mac'); }}
-      >
+      <span class="dlb" aria-disabled="true" data-os="mac">
         <svg class="fi" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>
-        <span><b>macOS</b><small>Download · Apple Silicon &amp; Intel</small></span>
-      </a>
+        <span><b>macOS</b><small>Coming soon · Apple Silicon &amp; Intel</small></span>
+      </span>
       <a
         class="dlb"
         href="https://github.com/corde-voice/corde-releases/releases/latest/download/Corde-setup.exe"
@@ -828,13 +822,13 @@
   <section id="pricing" aria-labelledby="pricing-heading">
     <div class="hd">
       <h2 id="pricing-heading">Simple Pricing</h2>
-      <p>Start with a 7-day free trial. Every plan includes unlimited local dictation, wake word, 3D buddy, and offline AI.</p>
+      <p>Start with a 5-day free trial. Every plan includes unlimited local dictation, wake word, 3D buddy, and offline AI.</p>
     </div>
     <div class="price">
       <div class="plan pop">
         <small class="plan-label">FREE TRIAL</small>
         <h3>Try Cordė</h3>
-        <strong class="plan-price">7 days</strong>
+        <strong class="plan-price">5 days</strong>
         <p class="plan-detail">Full access · Free</p>
         <span class="trial-tag">No credit card required</span>
       </div>
@@ -897,7 +891,7 @@
       </details>
       <details>
         <summary>How much does Cordė cost and how do I pronounce the name?</summary>
-        <p>Cordė is pronounced <strong>“Cord-ay”</strong>. Every download starts with a 7-day free trial (no credit card required), then $2.99/month or $34.99/year.</p>
+        <p>Cordė is pronounced <strong>“Cord-ay”</strong>. Every download starts with a 5-day free trial (no credit card required), then $2.99/month or $34.99/year.</p>
       </details>
     </div>
   </section>
@@ -905,7 +899,7 @@
   <section style="padding-top:20px">
     <div class="final">
       <h2>Your terminal has a voice—and an offline brain.</h2>
-      <p class="final-sub">Download Cordė for macOS or Windows and try your offline AI buddy free for 7 days.</p>
+      <p class="final-sub">Download Cordė for Windows and try your offline AI buddy free for 5 days.</p>
       <div class="cta">
         <a class="btn lg" href="/download" onclick={(e) => navigateSection(e, '/download', 'download')}>Download Cordė free</a>
         <a class="btn lg ghost" href="/pricing" onclick={(e) => navigateSection(e, '/pricing', 'pricing')}>View pricing</a>
